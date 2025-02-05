@@ -18,13 +18,14 @@ export const registerUser = async (
   return newUser
 }
 
-export const authenticateUser = async (email: string, password: string) => {
+export const authenticateUser = async (email: string, inputPassword: string) => {
   const user = await User.findOne({ email })
   if (!user) {
     throw new Error('User not found')
   }
 
-  const isMatch = await bcrypt.compare(password, user.password)
+  // Compare inputPassword with the user's stored password
+  const isMatch = await bcrypt.compare(inputPassword, user.password)
   if (!isMatch) {
     throw new Error('Invalid credentials')
   }
@@ -33,8 +34,13 @@ export const authenticateUser = async (email: string, password: string) => {
     expiresIn: '1h'
   })
 
-  return { token, user }
+  // Return user data without the password field
+  const { password, ...userWithoutPassword } = user.toObject()
+  
+  return { token, user: userWithoutPassword }
 }
+
+
 
 export const validateToken = (token: string) => {
   try {
