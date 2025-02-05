@@ -5,21 +5,37 @@ const Home = ({ admin }: { admin: any }) => {
     <div className="w-full">
       {/* Hero Section */}
       <section
-        className="h-[500px] bg-cover bg-center flex flex-col items-center justify-center text-white"
-        style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
-      >
-        <h1 className="text-5xl font-bold text-center sm:text-6xl">Book Your Flight with Garuda Flights</h1>
-        <p className="text-lg mt-4 text-center">Fast, Secure & Affordable</p>
-        {admin ? (
-          <Link to="/dashboard" className="mt-6 px-6 py-3 bg-yellow-500 text-xl rounded-lg hover:bg-yellow-600 transition-colors">
-            Admin Dashboard
-          </Link>
-        ) : (
-          <Link to="/flights" className="mt-6 px-6 py-3 bg-yellow-500 text-xl rounded-lg hover:bg-yellow-600 transition-colors">
-            Book Now
-          </Link>
-        )}
-      </section>
+  className="h-[500px] bg-cover bg-center flex flex-col items-center justify-center relative text-white"
+  style={{ backgroundImage: "url('/images/ek380.jpg')" }}
+>
+  {/* Overlay to darken the background */}
+  <div className="absolute inset-0 bg-black opacity-40"></div>
+
+  <h1 className="text-5xl font-bold text-center sm:text-6xl z-10">
+    Book Your Flight with Garuda Flights
+  </h1>
+  <p className="text-lg mt-4 text-center z-10">
+    Fast, Secure & Affordable
+  </p>
+
+  {admin ? (
+    <Link
+      to="/dashboard"
+      className="mt-6 px-6 py-3 bg-yellow-500 text-xl rounded-lg hover:bg-yellow-600 transition-colors z-10"
+    >
+      Admin Dashboard
+    </Link>
+  ) : (
+    <Link
+      to="/flights"
+      className="mt-6 px-6 py-3 bg-yellow-500 text-xl rounded-lg hover:bg-yellow-600 transition-colors z-10"
+    >
+      Book Now
+    </Link>
+  )}
+</section>
+
+
 
       {/* Features Section */}
       <section className="py-16 bg-gray-100">

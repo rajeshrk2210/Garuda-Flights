@@ -15,7 +15,7 @@ const Navbar = ({ admin, setAdmin }: { admin: any; setAdmin: (admin: any) => voi
           <Link to="/" className="text-white hover:text-gray-300">Home</Link>
         </li>
         <li>
-          <Link to="/flights" className="text-white hover:text-gray-300">Flights</Link>
+          <Link to="/Dashboard" className="text-white hover:text-gray-300">Dashboard</Link>
         </li>
         <li>
           <Link to="/about" className="text-white hover:text-gray-300">About Us</Link>
