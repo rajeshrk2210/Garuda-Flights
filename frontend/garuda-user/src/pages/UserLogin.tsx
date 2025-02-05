@@ -18,17 +18,16 @@ const UserLogin = ({ setUser }: { setUser: (user: any) => void }) => {
       });
   
       const data = await response.json();
-      console.log("Login Response:", data);  // Log the response to debug
   
       if (response.ok) {
-        if (data.user) {
-          setUser(data.user); // Set the user data if available
-          localStorage.setItem("user", JSON.stringify(data.user)); // Store user in localStorage
+        if (data.user && data.token) {
+          setUser(data.user);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("token", data.token);
           setLoginMessage("Logged in successfully!");
-          navigate('/'); // Redirect to home page or dashboard after login
+          navigate('/'); // Redirect to home or dashboard
         } else {
-          setLoginMessage("User data is missing.");
-          console.error("User data is missing in the response");
+          setLoginMessage("User data or token is missing.");
         }
       } else {
         setLoginMessage(data.message || "Login failed.");
@@ -38,19 +37,17 @@ const UserLogin = ({ setUser }: { setUser: (user: any) => void }) => {
       console.error("Error:", error);
     }
   };
-  
-  
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <form onSubmit={handleLogin} className="p-6 bg-white shadow-md rounded-lg">
-        <h2 className="text-2xl mb-4">Login</h2>
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <form onSubmit={handleLogin} className="max-w-sm w-full bg-white shadow-lg rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
         {/* Email input */}
         <input
           type="email"
           placeholder="Email"
-          className="block w-full p-2 mb-2 border"
+          className="block w-full p-3 mb-4 border border-gray-300 rounded-md"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -60,20 +57,20 @@ const UserLogin = ({ setUser }: { setUser: (user: any) => void }) => {
         <input
           type="password"
           placeholder="Password"
-          className="block w-full p-2 mb-2 border"
+          className="block w-full p-3 mb-4 border border-gray-300 rounded-md"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
 
         {/* Login button */}
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2">
+        <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600">
           Login
         </button>
 
-        {/* Display login status message */}
+        {/* Login status message */}
         {loginMessage && (
-          <p className="mt-4 text-green-500">{loginMessage}</p>
+          <p className="mt-4 text-center text-red-500">{loginMessage}</p>
         )}
       </form>
     </div>

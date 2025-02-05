@@ -18,7 +18,7 @@ const UserRegister = () => {
         body: JSON.stringify({
           email,
           password,
-          role: 'client', // 👈 Automatically setting role as "client"
+          role: 'client', // Automatically setting role as "client"
         }),
       });
 
@@ -35,29 +35,39 @@ const UserRegister = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold text-center mb-4">Register</h2>
-      {message && <p className="text-red-500 text-center">{message}</p>}
-      <form onSubmit={handleRegister} className="flex flex-col">
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <form onSubmit={handleRegister} className="max-w-sm w-full bg-white shadow-lg rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+
+        {/* Email input */}
         <input
           type="email"
           placeholder="Email"
-          className="p-2 border border-gray-300 rounded mb-2"
+          className="block w-full p-3 mb-4 border border-gray-300 rounded-md"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+
+        {/* Password input */}
         <input
           type="password"
           placeholder="Password"
-          className="p-2 border border-gray-300 rounded mb-2"
+          className="block w-full p-3 mb-4 border border-gray-300 rounded-md"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+
+        {/* Register button */}
+        <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600">
           Register
         </button>
+
+        {/* Registration status message */}
+        {message && (
+          <p className="mt-4 text-center text-red-500">{message}</p>
+        )}
       </form>
     </div>
   );
