@@ -38,12 +38,13 @@ const Home = () => {
 
       {/* CTA Section */}
       <section className="py-16 text-center">
-        <h2 className="text-4xl font-bold">Ready to Fly?</h2>
-        <p className="text-lg mt-4">Find the best flights with us now.</p>
-        <Link to="/flights" className="mt-6 px-6 py-3 bg-blue-500 text-white text-xl rounded-lg hover:bg-blue-600">
+        <h2 className="text-4xl font-bold mb-6">Ready to Fly?</h2>
+        <p className="text-lg mb-6">Find the best flights with us now.</p>
+        <Link to="/flights" className="mt-4 px-6 py-3 bg-blue-500 text-white text-xl rounded-lg hover:bg-blue-600">
           Find Flights
         </Link>
       </section>
+
     </div>
   );
 };
