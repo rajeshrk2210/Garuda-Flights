@@ -1,0 +1,11 @@
+# Node.js dependencies
+node_modules/
+package-lock.json
+
+# Compiled TypeScript files
+dist/
+*.js
+*.js.map
+
+# Environment variables
+.env
