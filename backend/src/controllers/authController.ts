@@ -3,69 +3,69 @@ import { User } from "../models/User";
 import { registerUser, authenticateUser } from "../services/authService";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const {
-      email,
-      password,
-      role,
-      userName,
-      userImage,
-      dateOfBirth,
-      gender,
-      nationality,
-      phoneNumber,
-      alternatePhoneNumber,
-      mailingAddress,
-      passportNumber,
-      emergencyContactDetails
-    } = req.body;
+    try {
+        const {
+            email,
+            password,
+            role,
+            userName,
+            userImage,
+            dateOfBirth,
+            gender,
+            nationality,
+            phoneNumber,
+            alternatePhoneNumber,
+            mailingAddress,
+            passportNumber,
+            emergencyContactDetails
+        } = req.body;
 
-    if (
-      !email || !password || !role || !userName || !dateOfBirth || !gender || 
-      !nationality || !phoneNumber
-    ) {
-      res.status(400).json({ message: "Required fields are missing" });
-      return;
+        if (
+            !email || !password || !role || !userName || !dateOfBirth || !gender ||
+            !nationality || !phoneNumber
+        ) {
+            res.status(400).json({ message: "Required fields are missing" });
+            return;
+        }
+
+        const newUser = await registerUser(
+            email,
+            password,
+            role,
+            userName,
+            userImage || "",
+            dateOfBirth,
+            gender,
+            nationality,
+            phoneNumber,
+            alternatePhoneNumber || "",
+            mailingAddress || "",
+            passportNumber || "",
+            emergencyContactDetails || ""
+        );
+
+        res.status(201).json({ message: "User registered successfully", user: newUser });
+    } catch (error) {
+        console.error("Registration Error:", error);
+        res.status(400).json({ message: error instanceof Error ? error.message : "An error occurred" });
     }
-
-    const newUser = await registerUser(
-      email,
-      password,
-      role,
-      userName,
-      userImage || "",
-      dateOfBirth,
-      gender,
-      nationality,
-      phoneNumber,
-      alternatePhoneNumber || "",
-      mailingAddress || "",
-      passportNumber || "",
-      emergencyContactDetails || ""
-    );
-
-    res.status(201).json({ message: "User registered successfully", user: newUser });
-  } catch (error) {
-    console.error("Registration Error:", error);
-    res.status(400).json({ message: error instanceof Error ? error.message : "An error occurred" });
-  }
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ message: "Email and password are required" });
-      return;
+        if (!email || !password) {
+            res.status(400).json({ message: "Email and password are required" });
+            return;
+        }
+
+        const { token, user } = await authenticateUser(email, password);
+        res.status(200).json({ message: "Login successful", token, user });
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(400).json({ message: error instanceof Error ? error.message : "Invalid credentials" });
     }
-
-    const { token, user } = await authenticateUser(email, password);
-    res.status(200).json({ message: "Login successful", token, user });
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(400).json({ message: error instanceof Error ? error.message : "Invalid credentials" });
-  }
 };
 
 /**
@@ -75,17 +75,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
  */
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = (req as any).user.userId; // Extract userId from token
-  
-      const user = await User.findById(userId).select("-password"); // Exclude password
-      if (!user) {
-        res.status(404).json({ message: "User not found" });
-        return;
-      }
-  
-      res.status(200).json({ message: "Profile fetched successfully", user });
+        const userId = (req as any).user.userId; // Extract userId from token
+
+        const user = await User.findById(userId).select("-password"); // Exclude password
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+
+        res.status(200).json({ message: "Profile fetched successfully", user });
     } catch (error) {
-      console.error("Error fetching profile:", error);
-      res.status(500).json({ message: "Internal server error" });
+        console.error("Error fetching profile:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
-  };
+};
