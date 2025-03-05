@@ -43,13 +43,11 @@ export const addAircraft = async (req: Request, res: Response): Promise<void> =>
 export const getAircrafts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { aircraftNumber, aircraftModel } = req.query;
-
     let query: any = {};
 
     if (aircraftNumber && typeof aircraftNumber === "string") {
       query.aircraftNumber = { $regex: new RegExp(aircraftNumber, "i") };
     }
-
     if (aircraftModel && typeof aircraftModel === "string") {
       query.aircraftModel = { $regex: new RegExp(aircraftModel, "i") };
     }
@@ -57,7 +55,7 @@ export const getAircrafts = async (req: Request, res: Response): Promise<void> =
     const aircrafts = await Aircraft.find(query);
 
     if (aircrafts.length === 0) {
-      res.status(404).json({ message: "No matching aircrafts found" });
+      res.status(200).json([]); // ✅ Send empty array instead of 404 error
       return;
     }
 
@@ -67,3 +65,4 @@ export const getAircrafts = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
