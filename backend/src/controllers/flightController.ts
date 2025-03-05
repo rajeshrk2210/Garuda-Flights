@@ -6,13 +6,14 @@ import { Flight } from "../models/Flight";
  */
 export const getFlights = async (req: Request, res: Response): Promise<void> => {
   try {
-    const flights = await Flight.find();
+    const flights = await Flight.find().populate("route"); // ✅ Ensures full route details are included
     res.status(200).json(flights);
   } catch (error) {
-    console.error("Error fetching flights:", error);
+    console.error("❌ Error fetching flights:", error);
     res.status(500).json({ message: "Error fetching flights" });
   }
 };
+
 
 /**
  * Create a new flight (Admin only)
