@@ -1,35 +1,30 @@
 import { Router } from "express";
-import { getRoutes, createRoute, updateRoute, deleteRoute } from "../controllers/routeController";
-import { authenticateUser, authorizeAdmin } from "../middlewares/authMiddleware";
+import { addRoute, getRoutes, getLocations } from "../controllers/routeController";
 
 const router = Router();
 
-/**
- * @route   GET /admin/routes
- * @desc    Get all flight routes
- * @access  Protected (Users & Admins can view)
- */
-router.get("/", authenticateUser, getRoutes);
+router.post("/add", async (req, res, next) => {
+  try {
+    await addRoute(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
 
-/**
- * @route   POST /admin/routes
- * @desc    Create a new flight route (Admin only)
- * @access  Protected (Admin Only)
- */
-router.post("/", authenticateUser, authorizeAdmin, createRoute);
+router.get("/", async (req, res, next) => {
+  try {
+    await getRoutes(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
 
-/**
- * @route   PUT /admin/routes/:routeId
- * @desc    Update an existing route (Admin only)
- * @access  Protected (Admin Only)
- */
-router.put("/:routeId", authenticateUser, authorizeAdmin, updateRoute);
-
-/**
- * @route   DELETE /admin/routes/:routeId
- * @desc    Delete a flight route (Admin only)
- * @access  Protected (Admin Only)
- */
-router.delete("/:routeId", authenticateUser, authorizeAdmin, deleteRoute);
+router.get("/locations", async (req, res, next) => {
+  try {
+    await getLocations(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;
