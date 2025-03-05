@@ -36,7 +36,8 @@ const Signup = () => {
 
     // ✅ Convert empty strings to ""
     const sanitizedData = {
-      userName: formData.userName.trim(), // 🔹 Trim whitespace
+      role: "admin", // ✅ Force role to admin
+      userName: formData.userName.trim(),
       email: formData.email.trim(),
       password: formData.password,
       dateOfBirth: formData.dateOfBirth || "",
@@ -48,6 +49,7 @@ const Signup = () => {
       passportNumber: formData.passportNumber || "",
       emergencyContactDetails: formData.emergencyContactDetails || "",
     };
+    
 
     try {
       const response = await fetch("http://localhost:5000/auth/register", {

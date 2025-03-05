@@ -23,21 +23,25 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // Fetch data from backend
     const fetchData = async () => {
-      const aircraftResponse = await fetch("http://localhost:5000/aircrafts/count");
-      const locationsResponse = await fetch("http://localhost:5000/locations/count");
-      const routesResponse = await fetch("http://localhost:5000/routes/count");
-      const flightsResponse = await fetch("http://localhost:5000/flights/stats");
-
-      setAircrafts(await aircraftResponse.json());
-      setLocations(await locationsResponse.json());
-      setRoutes(await routesResponse.json());
-      setFlights(await flightsResponse.json());
+      try {
+        const aircraftResponse = await fetch("http://localhost:5000/api/aircrafts/count");
+        const locationsResponse = await fetch("http://localhost:5000/api/routes/locations");
+        const routesResponse = await fetch("http://localhost:5000/api/routes/count");
+        const flightsResponse = await fetch("http://localhost:5000/api/flights/stats");
+  
+        setAircrafts(await aircraftResponse.json());
+        setLocations(await locationsResponse.json());
+        setRoutes(await routesResponse.json());
+        setFlights(await flightsResponse.json());
+      } catch (error) {
+        console.error("❌ Dashboard API error:", error);
+      }
     };
-
+  
     fetchData();
   }, []);
+  
 
   return (
     <div className="p-6">

@@ -59,6 +59,35 @@ const Admin = () => {
     }
   };
 
+  const addAircraft = async () => {
+    if (!newAircraft.aircraftNumber || !newAircraft.aircraftModel || newAircraft.economySeats <= 0 || newAircraft.premiumSeats <= 0) {
+      alert("⚠️ All fields are required!");
+      return;
+    }
+  
+    try {
+      const response = await fetch("http://localhost:5000/api/aircrafts/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAircraft),
+      });
+  
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert("✅ Aircraft added successfully!");
+        setNewAircraft({ aircraftNumber: "", aircraftModel: "", economySeats: 0, premiumSeats: 0 });
+        fetchAircrafts(); // Refresh aircraft list
+      } else {
+        alert(`❌ Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("❌ Network Error:", error);
+      alert("❌ Network error: Failed to connect to backend.");
+    }
+  };
+  
+
   return (
     <div className="p-6">
       <h2 className="text-3xl font-bold mb-6">Admin Panel</h2>
@@ -77,7 +106,7 @@ const Admin = () => {
           </select>
           <input type="number" placeholder="Economy Seats" className="border p-2 w-full mb-2" onChange={(e) => setNewAircraft({ ...newAircraft, economySeats: Number(e.target.value) })} />
           <input type="number" placeholder="Premium Seats" className="border p-2 w-full mb-2" onChange={(e) => setNewAircraft({ ...newAircraft, premiumSeats: Number(e.target.value) })} />
-          <button onClick={fetchAircrafts} className="bg-blue-500 text-white px-4 py-2 rounded">Add Aircraft</button>
+          <button onClick={addAircraft} className="bg-blue-500 text-white px-4 py-2 rounded">Add Aircraft</button>
         </div>
 
         {/* Search & Display Aircrafts */}

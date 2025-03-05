@@ -29,7 +29,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
     setAdmin(null);
+    window.location.href = "/login"; // ✅ Redirect after logout
   };
+  
 
   return (
     <AuthContext.Provider value={{ admin, login, logout }}>

@@ -9,8 +9,8 @@ const Profile = () => {
   return (
     <div className="p-6">
       <h1 className="text-4xl font-bold">Admin Profile</h1>
-      <p><strong>Email:</strong> {admin?.email}</p>
-      <p><strong>Role:</strong> {admin?.role}</p>
+      <p><strong>Email:</strong> {admin?.email || "Loading..."}</p>
+      <p><strong>Role:</strong> {admin?.role || "Loading..."}</p>
     </div>
   );
 };
