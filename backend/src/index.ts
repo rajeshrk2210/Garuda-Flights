@@ -31,7 +31,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/aircrafts", aircraftRoutes);
 
 app.use("/auth", authRoutes);
-app.use("/admin/flights", flightRoutes);
+app.use("/api/flights", flightRoutes);
 app.use("/api/routes", routeRoutes); // ✅ Correct API route
 
 

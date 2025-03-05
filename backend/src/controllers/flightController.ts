@@ -18,21 +18,34 @@ export const getFlights = async (req: Request, res: Response): Promise<void> => 
  * Create a new flight (Admin only)
  */
 export const createFlight = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { aircraftNumber, route, departureDate, departureTime, status } = req.body;
+  console.log("📩 Incoming Flight Request:", req.body); // Log request data
 
-    if (!aircraftNumber || !route || !departureDate || !departureTime || !status) {
+  try {
+    const { aircraftNumber, routeId, departureDate, departureTime, economyPrice, premiumPrice } = req.body;
+
+    if (!aircraftNumber || !routeId || !departureDate || !departureTime || !economyPrice || !premiumPrice) {
+      console.error("❌ Missing Fields");
       res.status(400).json({ message: "All fields are required" });
       return;
     }
 
-    const newFlight = new Flight({ aircraftNumber, route, departureDate, departureTime, status });
-    await newFlight.save();
+    const newFlight = new Flight({ 
+      aircraftNumber, 
+      route: routeId, // ✅ Corrected to match schema
+      departureDate, 
+      departureTime, 
+      economyPrice, 
+      premiumPrice,
+      status: "OK"
+    });
 
-    res.status(201).json({ message: "Flight created successfully", flight: newFlight });
+    await newFlight.save();
+    console.log("✅ Flight Added Successfully:", newFlight);
+
+    res.status(201).json({ message: "Flight added successfully", flight: newFlight });
   } catch (error) {
-    console.error("Error creating flight:", error);
-    res.status(400).json({ message: "Error creating flight" });
+    console.error("❌ Internal Server Error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
