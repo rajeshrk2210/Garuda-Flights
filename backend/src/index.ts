@@ -27,12 +27,14 @@ try {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Routes
+// ✅ Ensure aircraft route is correctly registered
+app.use("/api/aircrafts", aircraftRoutes);
+
 app.use("/auth", authRoutes);
 app.use("/admin/flights", flightRoutes);
 app.use("/admin/routes", routeRoutes);
-app.use("/api/aircrafts", aircraftRoutes); // ✅ Ensure route is registered
 
+// Test route
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({ message: "Welcome to Garuda Flights API" });
 });

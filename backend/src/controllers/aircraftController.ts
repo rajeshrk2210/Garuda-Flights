@@ -1,37 +1,21 @@
 import { Request, Response } from "express";
 import Aircraft from "../models/Aircraft";
 
-const allowedModels = [
-  "Boeing 737",
-  "Boeing 747",
-  "Boeing 777",
-  "Boeing 787 Dreamliner",
-  "Airbus A320",
-  "Airbus A330",
-  "Airbus A350",
-  "Airbus A380",
-  "Embraer E190",
-  "Bombardier CRJ900"
-];
-
-export const addAircraft = async (req: Request, res: Response): Promise<void> => {  // ✅ Explicit return type
+/**
+ * Add a new aircraft
+ * @route POST /api/aircrafts/add
+ */
+export const addAircraft = async (req: Request, res: Response): Promise<void> => {
   try {
     const { aircraftNumber, aircraftModel, economySeats, premiumSeats } = req.body;
 
     if (!aircraftNumber || !aircraftModel || !economySeats || !premiumSeats) {
-      console.warn("❌ Missing required fields:", req.body);
       res.status(400).json({ message: "All fields are required" });
-      return;
-    }
-
-    if (!allowedModels.includes(aircraftModel)) {
-      res.status(400).json({ message: "Invalid aircraft model" });
       return;
     }
 
     const existingAircraft = await Aircraft.findOne({ aircraftNumber });
     if (existingAircraft) {
-      console.warn("❌ Duplicate Aircraft Number:", aircraftNumber);
       res.status(400).json({ message: "Aircraft Number must be unique" });
       return;
     }
@@ -44,19 +28,42 @@ export const addAircraft = async (req: Request, res: Response): Promise<void> =>
     });
 
     await newAircraft.save();
-    console.log("✅ Aircraft Added Successfully:", newAircraft);
+    console.log("✅ Aircraft Added:", newAircraft);
     res.status(201).json({ message: "Aircraft added successfully", aircraft: newAircraft });
-
   } catch (error) {
-    let errorMessage = "Internal server error";
+    console.error("❌ Error adding aircraft:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      console.error("❌ Error adding aircraft:", error.message);
-    } else {
-      console.error("❌ Unknown error occurred while adding aircraft.");
+/**
+ * Fetch aircrafts with optional search
+ * @route GET /api/aircrafts
+ */
+export const getAircrafts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { aircraftNumber, aircraftModel } = req.query;
+
+    let query: any = {};
+
+    if (aircraftNumber && typeof aircraftNumber === "string") {
+      query.aircraftNumber = { $regex: new RegExp(aircraftNumber, "i") };
     }
 
-    res.status(500).json({ message: errorMessage });
+    if (aircraftModel && typeof aircraftModel === "string") {
+      query.aircraftModel = { $regex: new RegExp(aircraftModel, "i") };
+    }
+
+    const aircrafts = await Aircraft.find(query);
+
+    if (aircrafts.length === 0) {
+      res.status(404).json({ message: "No matching aircrafts found" });
+      return;
+    }
+
+    res.status(200).json(aircrafts);
+  } catch (error) {
+    console.error("❌ Error fetching aircrafts:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
