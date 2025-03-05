@@ -32,7 +32,8 @@ app.use("/api/aircrafts", aircraftRoutes);
 
 app.use("/auth", authRoutes);
 app.use("/admin/flights", flightRoutes);
-app.use("/admin/routes", routeRoutes);
+app.use("/api/routes", routeRoutes); // ✅ Correct API route
+
 
 // Test route
 app.get("/", (req: Request, res: Response) => {

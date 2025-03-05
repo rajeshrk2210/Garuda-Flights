@@ -3,28 +3,8 @@ import { addRoute, getRoutes, getLocations } from "../controllers/routeControlle
 
 const router = Router();
 
-router.post("/add", async (req, res, next) => {
-  try {
-    await addRoute(req, res);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/", async (req, res, next) => {
-  try {
-    await getRoutes(req, res);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/locations", async (req, res, next) => {
-  try {
-    await getLocations(req, res);
-  } catch (error) {
-    next(error);
-  }
-});
+router.post("/add", addRoute); // ✅ Ensure this route exists
+router.get("/", getRoutes);
+router.get("/locations", getLocations);
 
 export default router;

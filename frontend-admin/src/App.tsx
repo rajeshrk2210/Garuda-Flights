@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import Admin from "./components/Admin";
+import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 
 const App = () => {

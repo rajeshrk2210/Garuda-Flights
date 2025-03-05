@@ -8,34 +8,33 @@ const locations = [
 ];
 
 export const addRoute = async (req: Request, res: Response): Promise<void> => {
+  console.log("📩 Received Add Route Request:", req.body); // 🔹 Log request data
+
   try {
     const { startLocation, endLocation, distance, duration } = req.body;
 
     if (!startLocation || !endLocation || !distance || !duration) {
+      console.error("❌ Missing Fields");
       res.status(400).json({ message: "All fields are required" });
       return;
     }
     if (startLocation === endLocation) {
+      console.error("❌ Start and End Locations are the Same");
       res.status(400).json({ message: "Start and End locations cannot be the same" });
-      return;
-    }
-
-    const existingRoute = await Route.findOne({ startLocation, endLocation });
-    if (existingRoute) {
-      res.status(400).json({ message: "Route already exists" });
       return;
     }
 
     const newRoute = new Route({ startLocation, endLocation, distance, duration });
     await newRoute.save();
+    console.log("✅ Route Added Successfully:", newRoute);
 
-    console.log("✅ Route Added:", newRoute);
     res.status(201).json({ message: "Route added successfully", route: newRoute });
   } catch (error) {
-    console.error("❌ Error adding route:", error);
+    console.error("❌ Error Adding Route:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const getRoutes = async (req: Request, res: Response): Promise<void> => {
   try {

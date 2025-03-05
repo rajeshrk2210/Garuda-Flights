@@ -1,5 +1,5 @@
 import AircraftManagement from "../components/admin/AircraftManagement";
-// import RouteManagement from "../components/admin/RouteManagement";
+import RouteManagement from "../components/admin/RouteManagement";
 // import FlightManagement from "../components/admin/FlightManagement";
 
 const Admin = () => {
@@ -11,7 +11,7 @@ const Admin = () => {
       <AircraftManagement />
 
       {/* Route Management Section */}
-      {/* <RouteManagement /> */}
+      <RouteManagement />
 
       {/* Flight Management Section */}
       {/* <FlightManagement /> */}
