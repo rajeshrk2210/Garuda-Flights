@@ -7,6 +7,19 @@ interface Aircraft {
   premiumSeats: number;
 }
 
+const aircraftModels = [
+  "Boeing 737",
+  "Boeing 747",
+  "Boeing 777",
+  "Boeing 787 Dreamliner",
+  "Airbus A320",
+  "Airbus A330",
+  "Airbus A350",
+  "Airbus A380",
+  "Embraer E190",
+  "Bombardier CRJ900"
+];
+
 const Admin = () => {
   const [newAircraft, setNewAircraft] = useState<Aircraft>({
     aircraftNumber: "",
@@ -15,8 +28,7 @@ const Admin = () => {
     premiumSeats: 0,
   });
 
-  const [aircrafts, setAircrafts] = useState<Aircraft[]>([]); // ✅ Define state type
-
+  const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
   const [searchAircraftNumber, setSearchAircraftNumber] = useState("");
   const [searchAircraftModel, setSearchAircraftModel] = useState("");
 
@@ -26,8 +38,10 @@ const Admin = () => {
 
   const fetchAircrafts = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/aircrafts?aircraftNumber=${searchAircraftNumber}&aircraftModel=${searchAircraftModel}`);
-      const data: Aircraft[] = await response.json(); // ✅ Ensure correct data type
+      const response = await fetch(
+        `http://localhost:5000/api/aircrafts?aircraftNumber=${searchAircraftNumber}&aircraftModel=${searchAircraftModel}`
+      );
+      const data: Aircraft[] = await response.json();
       setAircrafts(data);
     } catch (error) {
       console.error("❌ Error fetching aircrafts:", error);
@@ -54,8 +68,13 @@ const Admin = () => {
 
       if (response.ok) {
         alert("✅ Aircraft added successfully!");
-        setNewAircraft({ aircraftNumber: "", aircraftModel: "", economySeats: 0, premiumSeats: 0 });
-        fetchAircrafts(); // Refresh aircraft list
+        setNewAircraft({
+          aircraftNumber: "",
+          aircraftModel: "",
+          economySeats: 0,
+          premiumSeats: 0
+        });
+        fetchAircrafts();
       } else {
         alert(`❌ Error: ${data.message}`);
       }
@@ -72,31 +91,73 @@ const Admin = () => {
       {/* Add Aircraft Form */}
       <div className="bg-white p-4 rounded shadow-md mb-6">
         <h3 className="text-lg font-semibold mb-2">Add Aircraft</h3>
-        <input type="text" name="aircraftNumber" value={newAircraft.aircraftNumber} onChange={handleInputChange} placeholder="Aircraft Number" className="border p-2 w-full mb-2" />
-        <select name="aircraftModel" value={newAircraft.aircraftModel} onChange={handleInputChange} className="border p-2 w-full mb-2">
+        <input
+          type="text"
+          name="aircraftNumber"
+          value={newAircraft.aircraftNumber}
+          onChange={handleInputChange}
+          placeholder="Aircraft Number"
+          className="border p-2 w-full mb-2"
+        />
+        <select
+          name="aircraftModel"
+          value={newAircraft.aircraftModel}
+          onChange={handleInputChange}
+          className="border p-2 w-full mb-2"
+        >
           <option value="">Select Model</option>
-          <option value="Boeing 737">Boeing 737</option>
-          <option value="Boeing 747">Boeing 747</option>
-          <option value="Boeing 777">Boeing 777</option>
-          <option value="Boeing 787 Dreamliner">Boeing 787 Dreamliner</option>
-          <option value="Airbus A320">Airbus A320</option>
-          <option value="Airbus A330">Airbus A330</option>
-          <option value="Airbus A350">Airbus A350</option>
-          <option value="Airbus A380">Airbus A380</option>
-          <option value="Embraer E190">Embraer E190</option>
-          <option value="Bombardier CRJ900">Bombardier CRJ900</option>
+          {aircraftModels.map((model, index) => (
+            <option key={index} value={model}>
+              {model}
+            </option>
+          ))}
         </select>
-        <input type="number" name="economySeats" value={newAircraft.economySeats} onChange={handleInputChange} placeholder="Economy Seats" className="border p-2 w-full mb-2" />
-        <input type="number" name="premiumSeats" value={newAircraft.premiumSeats} onChange={handleInputChange} placeholder="Premium Seats" className="border p-2 w-full mb-2" />
-        <button onClick={addAircraft} className="bg-blue-500 text-white px-4 py-2 rounded">Add Aircraft</button>
+        <input
+          type="number"
+          name="economySeats"
+          value={newAircraft.economySeats}
+          onChange={handleInputChange}
+          placeholder="Economy Seats"
+          className="border p-2 w-full mb-2"
+        />
+        <input
+          type="number"
+          name="premiumSeats"
+          value={newAircraft.premiumSeats}
+          onChange={handleInputChange}
+          placeholder="Premium Seats"
+          className="border p-2 w-full mb-2"
+        />
+        <button onClick={addAircraft} className="bg-blue-500 text-white px-4 py-2 rounded">
+          Add Aircraft
+        </button>
       </div>
 
       {/* Search Bar */}
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Search Aircrafts</h3>
-        <input type="text" placeholder="Search by Aircraft Number" className="border p-2 mr-2" value={searchAircraftNumber} onChange={(e) => setSearchAircraftNumber(e.target.value)} />
-        <input type="text" placeholder="Search by Model" className="border p-2 mr-2" value={searchAircraftModel} onChange={(e) => setSearchAircraftModel(e.target.value)} />
-        <button onClick={fetchAircrafts} className="bg-green-500 text-white px-4 py-2 rounded">Search</button>
+        <input
+          type="text"
+          placeholder="Search by Aircraft Number"
+          className="border p-2 mr-2"
+          value={searchAircraftNumber}
+          onChange={(e) => setSearchAircraftNumber(e.target.value)}
+        />
+        <select
+          value={searchAircraftModel}
+          onChange={(e) => setSearchAircraftModel(e.target.value)}
+          className="border p-2 mr-2"
+        >
+          <option value="">All Models</option>
+          {aircraftModels.map((model, index) => (
+            <option key={index} value={model}>
+              {model}
+            </option>
+          ))}
+        </select>
+        <button onClick={fetchAircrafts} className="bg-green-500 text-white px-4 py-2 rounded">
+          Search
+        </button>
       </div>
 
       {/* Aircraft List */}
@@ -111,7 +172,7 @@ const Admin = () => {
           </tr>
         </thead>
         <tbody>
-          {aircrafts.map((aircraft: Aircraft, index) => ( // ✅ Explicitly define type
+          {aircrafts.map((aircraft: Aircraft, index) => (
             <tr key={index} className="border">
               <td className="border p-2">{aircraft.aircraftNumber}</td>
               <td className="border p-2">{aircraft.aircraftModel}</td>
