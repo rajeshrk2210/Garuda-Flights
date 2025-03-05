@@ -4,11 +4,12 @@ import { registerUser, authenticateUser } from "../services/authService";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
+        console.log("Received Request Body:", req.body); // 🔹 Log input data
+
         const {
             email,
             password,
-            role,
-            userName,
+            userName,  // Ensure field names match frontend
             userImage,
             dateOfBirth,
             gender,
@@ -20,36 +21,43 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             emergencyContactDetails
         } = req.body;
 
-        if (
-            !email || !password || !role || !userName || !dateOfBirth || !gender ||
-            !nationality || !phoneNumber
-        ) {
-            res.status(400).json({ message: "Required fields are missing" });
+        let role: "admin" | "user" = "user"; // Default to "user"
+        if (req.headers["x-frontend-origin"] === "admin") {
+            role = "admin";
+        }
+
+        // ✅ Validate required fields
+        if (!email || !password || !userName) {
+            console.error("❌ Validation Failed: Missing required fields");
+            res.status(400).json({ message: "Username, email, and password are required." });
             return;
         }
 
+        // ✅ Register user (Admin or Regular User)
         const newUser = await registerUser(
             email,
             password,
             role,
             userName,
             userImage || "",
-            dateOfBirth,
-            gender,
-            nationality,
-            phoneNumber,
+            dateOfBirth || "",
+            gender || "",
+            nationality || "",
+            phoneNumber || "",
             alternatePhoneNumber || "",
             mailingAddress || "",
             passportNumber || "",
             emergencyContactDetails || ""
         );
 
-        res.status(201).json({ message: "User registered successfully", user: newUser });
+        res.status(201).json({ message: `${role.charAt(0).toUpperCase() + role.slice(1)} registered successfully`, user: newUser });
     } catch (error) {
-        console.error("Registration Error:", error);
+        console.error("❌ Registration Error:", error);
         res.status(400).json({ message: error instanceof Error ? error.message : "An error occurred" });
     }
 };
+
+
 
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {

@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* Custom Styles */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  background-color: #f8f9fa;
+  color: #333;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Links */
+a {
+  font-weight: 500;
+  color: #2563eb; /* Tailwind blue-600 */
+  text-decoration: inherit;
+}
+a:hover {
+  color: #1e40af; /* Tailwind blue-800 */
+}
+
+/* Buttons */
+button {
+  border-radius: 6px;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #3b82f6; /* Tailwind blue-500 */
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #2563eb; /* Tailwind blue-600 */
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid #2563eb; /* Tailwind blue-600 */
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.input:focus {
+  border-color: #3b82f6; /* Tailwind Blue */
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a1a;
+    color: #e5e7eb; /* Tailwind gray-200 */
+  }
+
+  a {
+    color: #93c5fd; /* Tailwind blue-300 */
+  }
+
+  button {
+    background-color: #2563eb;
+  }
+
+  button:hover {
+    background-color: #1e40af;
+  }
+}

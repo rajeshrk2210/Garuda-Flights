@@ -3,6 +3,7 @@ import swaggerUi from "swagger-ui-express";
 import authRoutes from "./routes/authRoutes";
 import flightRoutes from "./routes/flightRoutes";
 import routeRoutes from "./routes/routeRoutes";
+import aircraftRoutes from "./routes/aircraftRoutes";
 import fs from "fs";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -30,6 +31,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/auth", authRoutes);
 app.use("/admin/flights", flightRoutes);
 app.use("/admin/routes", routeRoutes);
+app.use("/api/aircrafts", aircraftRoutes); // ✅ Ensure route is registered
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({ message: "Welcome to Garuda Flights API" });

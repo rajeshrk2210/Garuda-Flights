@@ -1,31 +1,38 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const UserSchema = new Schema(
-  {
-    // User Profile Image
-    userImage: { type: String, default: "" },
+export interface IUser extends Document {
+  userName: string;
+  email: string;
+  password: string;
+  role: "admin" | "user";
+  userImage?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  nationality?: string;
+  phoneNumber?: string;
+  alternatePhoneNumber?: string;
+  mailingAddress?: string;
+  passportNumber?: string;
+  emergencyContactDetails?: string;
+}
 
-    // Basic Information
-    userName: { type: String, required: true },
-    dateOfBirth: { type: Date, required: true },
-    gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
-    nationality: { type: String, required: true },
+const UserSchema: Schema = new Schema({
+  userName: { type: String, required: true, trim: true }, // ❌ Removed `unique: true`
+  email: { type: String, required: true, unique: true }, // ✅ Only email is unique
+  password: { type: String, required: true },
+  role: { type: String, enum: ["admin", "user"], default: "user" },
+  userImage: { type: String },
+  dateOfBirth: { type: String, default: "" },
+  gender: { type: String, default: "" },
+  nationality: { type: String, default: "" },
+  phoneNumber: { type: String, default: "" },
+  alternatePhoneNumber: { type: String, default: "" },
+  mailingAddress: { type: String, default: "" },
+  passportNumber: { type: String, default: "" },
+  emergencyContactDetails: { type: String, default: "" },
+});
 
-    // Contact Details
-    email: { type: String, required: true, unique: true },
-    phoneNumber: { type: String, required: true },
-    alternatePhoneNumber: { type: String },
-    mailingAddress: { type: String },
+// ✅ Ensure only email is unique
+UserSchema.index({ email: 1 }, { unique: true });
 
-    // Identity & Verification
-    passportNumber: { type: String },
-    emergencyContactDetails: { type: String },
-
-    // Security & Account Settings
-    password: { type: String, required: true },
-    role: { type: String, enum: ["user", "admin"], required: true }
-  },
-  { timestamps: true }
-);
-
-export const User = model("User", UserSchema);
+export const User = mongoose.model<IUser>("User", UserSchema);
