@@ -9,7 +9,7 @@ interface Route {
   _id: string;
   startLocation: string;
   endLocation: string;
-  duration: string;
+  duration: string; // Format "HH:MM"
 }
 
 interface Flight {
@@ -18,17 +18,12 @@ interface Flight {
   route: Route;
   departureDate: string;
   departureTime: string;
+  arrivalDate: string;
+  arrivalTime: string;
   economyPrice: string;
   premiumPrice: string;
   status: string;
 }
-
-/** 🔹 Get Flight Type (UPCOMING or PREVIOUS) */
-const getFlightType = (departureDate: string, departureTime: string): string => {
-  const now = new Date();
-  const departureDateTime = new Date(`${departureDate}T${departureTime}`);
-  return departureDateTime > now ? "UPCOMING" : "PREVIOUS";
-};
 
 /** 🔹 Convert Date to Readable Format */
 const formatDate = (dateStr: string): string => {
@@ -44,6 +39,21 @@ const formatTime = (timeStr: string): string => {
   return `${formattedHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${ampm}`;
 };
 
+/** 🔹 Calculate Arrival Date & Time */
+const calculateArrivalDetails = (departureDate: string, departureTime: string, routeDuration: string) => {
+  if (!departureDate || !departureTime || !routeDuration) return { arrivalDate: "", arrivalTime: "" };
+
+  const depDateTime = new Date(`${departureDate}T${departureTime}`);
+  const [durationHours, durationMinutes] = routeDuration.split(":").map(Number);
+  depDateTime.setHours(depDateTime.getHours() + durationHours);
+  depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
+
+  return {
+    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
+    arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
+  };
+};
+
 const FlightManagement = () => {
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -54,6 +64,8 @@ const FlightManagement = () => {
     routeId: "",
     departureDate: "",
     departureTime: "",
+    arrivalDate: "",
+    arrivalTime: "",
     economyPrice: "",
     premiumPrice: "",
     status: "OK",
@@ -95,27 +107,45 @@ const FlightManagement = () => {
         alert("❌ No token found! Please log in again.");
         return;
       }
-  
+
       const response = await fetch("http://localhost:5000/api/flights", {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       let data: Flight[] = await response.json();
-      
-      console.log("📩 Flights fetched from backend:", data); // 🔹 Debug
-  
+
       const updatedFlights: Flight[] = data.map((flight) => ({
         ...flight,
-        route: flight.route || { startLocation: "Unknown", endLocation: "Unknown", duration: "00:00" }
+        route: flight.route || { startLocation: "Unknown", endLocation: "Unknown", duration: "00:00" },
       }));
-  
+
       setFlights(updatedFlights);
     } catch (error) {
       console.error("❌ Error fetching flights:", error);
     }
   };
-  
-  
+
+  /** 🔹 Handle Input Changes */
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    const updatedFlight = { ...newFlight, [name]: value };
+
+    // Update Arrival Date & Time if Departure Date/Time or Route changes
+    if (name === "departureDate" || name === "departureTime" || name === "routeId") {
+      const selectedRoute = routes.find((route) => route._id === updatedFlight.routeId);
+      if (selectedRoute) {
+        const { arrivalDate, arrivalTime } = calculateArrivalDetails(
+          updatedFlight.departureDate,
+          updatedFlight.departureTime,
+          selectedRoute.duration
+        );
+        updatedFlight.arrivalDate = arrivalDate;
+        updatedFlight.arrivalTime = arrivalTime;
+      }
+    }
+
+    setNewFlight(updatedFlight);
+  };
 
   /** 🔹 Add Flight */
   const addFlight = async () => {
@@ -137,7 +167,7 @@ const FlightManagement = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...newFlight, status: "OK" }),
+        body: JSON.stringify(newFlight),
       });
 
       const data = await response.json();
@@ -148,6 +178,8 @@ const FlightManagement = () => {
           routeId: "",
           departureDate: "",
           departureTime: "",
+          arrivalDate: "",
+          arrivalTime: "",
           economyPrice: "",
           premiumPrice: "",
           status: "OK",
@@ -170,56 +202,36 @@ const FlightManagement = () => {
       <div className="mb-6 p-4 border rounded bg-gray-50">
         <h4 className="text-lg font-semibold mb-2">➕ Add Flight</h4>
 
-        <select className="border p-2 w-full mb-2" value={newFlight.aircraftNumber} onChange={(e) => setNewFlight({ ...newFlight, aircraftNumber: e.target.value })}>
+        <label>Aircraft</label>
+        <select name="aircraftNumber" className="border p-2 w-full mb-2" value={newFlight.aircraftNumber} onChange={handleInputChange}>
           <option value="">Select Aircraft</option>
           {aircrafts.map((aircraft) => (
             <option key={aircraft.aircraftNumber} value={aircraft.aircraftNumber}>{aircraft.aircraftNumber}</option>
           ))}
         </select>
 
-        <select className="border p-2 w-full mb-2" value={newFlight.routeId} onChange={(e) => setNewFlight({ ...newFlight, routeId: e.target.value })}>
+        <label>Route</label>
+        <select name="routeId" className="border p-2 w-full mb-2" value={newFlight.routeId} onChange={handleInputChange}>
           <option value="">Select Route</option>
           {routes.map((route) => (
             <option key={route._id} value={route._id}>{route.startLocation} → {route.endLocation}</option>
           ))}
         </select>
 
-        <input type="date" className="border p-2 w-full mb-2" value={newFlight.departureDate} onChange={(e) => setNewFlight({ ...newFlight, departureDate: e.target.value })} />
-        <input type="time" className="border p-2 w-full mb-2" value={newFlight.departureTime} onChange={(e) => setNewFlight({ ...newFlight, departureTime: e.target.value })} />
+        <label>Departure Date</label>
+        <input type="date" name="departureDate" className="border p-2 w-full mb-2" value={newFlight.departureDate} onChange={handleInputChange} />
+
+        <label>Departure Time</label>
+        <input type="time" name="departureTime" className="border p-2 w-full mb-2" value={newFlight.departureTime} onChange={handleInputChange} />
+
+        <label>Economy Price</label>
+        <input type="text" name="economyPrice" className="border p-2 w-full mb-2" value={newFlight.economyPrice} onChange={handleInputChange} />
+
+        <label>Premium Price</label>
+        <input type="text" name="premiumPrice" className="border p-2 w-full mb-2" value={newFlight.premiumPrice} onChange={handleInputChange} />
 
         <button onClick={addFlight} className="bg-blue-500 text-white px-4 py-2 rounded">Add Flight</button>
       </div>
-
-      {/* Flight List Section */}
-      <h4 className="text-lg font-semibold mt-4">🛫 Flight List</h4>
-      {flights.length === 0 ? (
-        <p className="text-gray-600 mt-2">No flights available.</p>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300 mt-2">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">Aircraft</th>
-              <th className="border p-2">Start Location</th>
-              <th className="border p-2">End Location</th>
-              <th className="border p-2">Departure Date</th>
-              <th className="border p-2">Departure Time</th>
-              <th className="border p-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {flights.map((flight) => (
-              <tr key={flight._id} className="border">
-                <td className="border p-2">{flight.aircraftNumber}</td>
-                <td className="border p-2">{flight.route.startLocation}</td>
-                <td className="border p-2">{flight.route.endLocation}</td>
-                <td className="border p-2">{formatDate(flight.departureDate)}</td>
-                <td className="border p-2">{formatTime(flight.departureTime)}</td>
-                <td className="border p-2">{flight.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
   );
 };
