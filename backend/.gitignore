@@ -1,4 +1,11 @@
+# Node.js dependencies
 node_modules/
-logs/
+package-lock.json
+
+# Compiled TypeScript files
+dist/
+*.js
+*.js.map
+
+# Environment variables
 .env
-coverage/
