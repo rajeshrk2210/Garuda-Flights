@@ -172,7 +172,7 @@ const RouteManagement = () => {
             value={searchStart}
             onChange={(e) => setSearchStart(e.target.value)}
           >
-            <option value="">Select Start Location</option>
+            <option value="">All Locations</option> {/* ✅ Changed from "Select Start Location" */}
             {LOCATIONS.map((city) => (
               <option key={city} value={city}>{city}</option>
             ))}
@@ -183,7 +183,7 @@ const RouteManagement = () => {
             value={searchEnd}
             onChange={(e) => setSearchEnd(e.target.value)}
           >
-            <option value="">Select End Location</option>
+            <option value="">All Locations</option> {/* ✅ Changed from "Select End Location" */}
             {LOCATIONS.map((city) => (
               <option key={city} value={city}>{city}</option>
             ))}
@@ -200,6 +200,7 @@ const RouteManagement = () => {
           </button>
         </div>
       </div>
+
       {/* 📋 Route List */}
       <h4 className="text-lg font-semibold mt-4">📋 Route List</h4>
       {isSearching ? (
