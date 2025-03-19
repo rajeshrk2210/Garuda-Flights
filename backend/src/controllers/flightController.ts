@@ -1,43 +1,98 @@
 import { Request, Response } from "express";
 import { Flight } from "../models/Flight";
+import Route, { IRoute } from "../models/Route";
 
-/**
- * Get all flights
- */
+/** ✅ Helper Function to Calculate Arrival Date & Time */
+const calculateArrivalDetails = (departureDate: string, departureTime: string, duration: string) => {
+  const depDateTime = new Date(`${departureDate}T${departureTime}`);
+  const [durationHours, durationMinutes] = duration.split(":").map(Number);
+  depDateTime.setHours(depDateTime.getHours() + durationHours);
+  depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
+
+  return {
+    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
+    arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
+  };
+};
+
 export const getFlights = async (req: Request, res: Response): Promise<void> => {
   try {
-    const flights = await Flight.find().populate("route"); // ✅ Ensures full route details are included
-    res.status(200).json(flights);
+    const { aircraftNumber, startLocation, endLocation, departureDate } = req.query;
+    let filter: any = {};
+
+    if (aircraftNumber) filter.aircraftNumber = aircraftNumber;
+    if (departureDate) filter.departureDate = departureDate;
+
+    if (startLocation || endLocation) {
+      const routes = await Route.find({
+        ...(startLocation && { startLocation }),
+        ...(endLocation && { endLocation }),
+      }).select("_id");
+
+      if (routes.length === 0) {
+        res.status(404).json({ message: "No matching flights found." });
+        return;
+      }
+
+      filter.route = { $in: routes.map((route) => route._id) };
+    }
+
+    let flights = await Flight.find(filter).populate<{ route: IRoute }>("route").lean();
+
+    if (flights.length === 0) {
+      res.status(404).json({ message: "No flights found." });
+      return;
+    }
+
+    const updatedFlights = flights.map((flight) => {
+      if (!flight.route || !flight.route.duration) {
+        return { ...flight, arrivalDate: null, arrivalTime: null };
+      }
+
+      const arrivalDetails = calculateArrivalDetails(
+        flight.departureDate,
+        flight.departureTime,
+        flight.route.duration
+      );
+      return { ...flight, ...arrivalDetails };
+    });
+
+    res.status(200).json(updatedFlights);
   } catch (error) {
     console.error("❌ Error fetching flights:", error);
     res.status(500).json({ message: "Error fetching flights" });
   }
 };
 
-
-/**
- * Create a new flight (Admin only)
- */
 export const createFlight = async (req: Request, res: Response): Promise<void> => {
-  console.log("📩 Incoming Flight Request:", req.body); // Log request data
+  console.log("📩 Incoming Flight Request:", req.body);
 
   try {
     const { aircraftNumber, routeId, departureDate, departureTime, economyPrice, premiumPrice } = req.body;
 
     if (!aircraftNumber || !routeId || !departureDate || !departureTime || !economyPrice || !premiumPrice) {
-      console.error("❌ Missing Fields");
-      res.status(400).json({ message: "All fields are required" });
+      res.status(400).json({ message: "All fields are required." });
       return;
     }
 
-    const newFlight = new Flight({ 
-      aircraftNumber, 
-      route: routeId, // ✅ Corrected to match schema
-      departureDate, 
-      departureTime, 
-      economyPrice, 
+    const route = await Route.findById(routeId);
+    if (!route) {
+      res.status(404).json({ message: "Route not found." });
+      return;
+    }
+
+    const { arrivalDate, arrivalTime } = calculateArrivalDetails(departureDate, departureTime, route.duration);
+
+    const newFlight = new Flight({
+      aircraftNumber,
+      route: routeId,
+      departureDate,
+      departureTime,
+      arrivalDate,
+      arrivalTime,
+      economyPrice,
       premiumPrice,
-      status: "OK"
+      status: "OK",
     });
 
     await newFlight.save();
@@ -45,50 +100,7 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
 
     res.status(201).json({ message: "Flight added successfully", flight: newFlight });
   } catch (error) {
-    console.error("❌ Internal Server Error:", error);
+    console.error("❌ Error Adding Flight:", error);
     res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-/**
- * Update flight details (Admin only)
- */
-export const updateFlight = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { flightId } = req.params;
-    const updatedData = req.body;
-
-    const updatedFlight = await Flight.findByIdAndUpdate(flightId, updatedData, { new: true });
-
-    if (!updatedFlight) {
-      res.status(404).json({ message: "Flight not found" });
-      return;
-    }
-
-    res.status(200).json({ message: "Flight updated successfully", flight: updatedFlight });
-  } catch (error) {
-    console.error("Error updating flight:", error);
-    res.status(400).json({ message: "Error updating flight" });
-  }
-};
-
-/**
- * Delete a flight (Admin only)
- */
-export const deleteFlight = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { flightId } = req.params;
-
-    const deletedFlight = await Flight.findByIdAndDelete(flightId);
-
-    if (!deletedFlight) {
-      res.status(404).json({ message: "Flight not found" });
-      return;
-    }
-
-    res.status(200).json({ message: "Flight deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting flight:", error);
-    res.status(400).json({ message: "Error deleting flight" });
   }
 };

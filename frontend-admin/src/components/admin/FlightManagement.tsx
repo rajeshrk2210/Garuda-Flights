@@ -40,18 +40,31 @@ const formatTime = (timeStr: string): string => {
 };
 
 /** 🔹 Calculate Arrival Date & Time */
+/** 🔹 Calculate Arrival Date & Time (Ensuring Correct Local Time) */
 const calculateArrivalDetails = (departureDate: string, departureTime: string, routeDuration: string) => {
   if (!departureDate || !departureTime || !routeDuration) return { arrivalDate: "", arrivalTime: "" };
 
-  const depDateTime = new Date(`${departureDate}T${departureTime}`);
+  // ✅ Parse date and time as local time
+  const [year, month, day] = departureDate.split("-").map(Number);
+  const [depHours, depMinutes] = departureTime.split(":").map(Number);
   const [durationHours, durationMinutes] = routeDuration.split(":").map(Number);
+
+  // ✅ Create a new Date object without automatic UTC conversion
+  const depDateTime = new Date(year, month - 1, day, depHours, depMinutes);
+
+  console.log("📅 Departure DateTime (Before Adding Duration):", depDateTime.toLocaleString());
+
+  // ✅ Add duration correctly (ensuring local time handling)
   depDateTime.setHours(depDateTime.getHours() + durationHours);
   depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
 
-  return {
-    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
-    arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
-  };
+  console.log("🛬 Arrival DateTime (After Adding Duration):", depDateTime.toLocaleString());
+
+  // ✅ Format arrival date and time correctly
+  const arrivalDate = depDateTime.toISOString().split("T")[0]; // YYYY-MM-DD format
+  const arrivalTime = depDateTime.toTimeString().slice(0, 5); // HH:MM format
+
+  return { arrivalDate, arrivalTime };
 };
 
 const FlightManagement = () => {
@@ -142,8 +155,7 @@ const FlightManagement = () => {
         updatedFlight.arrivalDate = arrivalDate;
         updatedFlight.arrivalTime = arrivalTime;
       }
-    }
-
+    }    
     setNewFlight(updatedFlight);
   };
 

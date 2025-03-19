@@ -1,7 +1,17 @@
 import { Request, Response } from "express";
 import { User } from "../models/User";
 import { registerUser, authenticateUser } from "../services/authService";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import dotenv from "dotenv";
 
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "your-refresh-secret-key";
+
+/**
+ * Register User or Admin
+ */
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         console.log("Received Request Body:", req.body); // 🔹 Log input data
@@ -9,7 +19,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const {
             email,
             password,
-            userName,  // Ensure field names match frontend
+            userName,
             userImage,
             dateOfBirth,
             gender,
@@ -21,19 +31,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             emergencyContactDetails
         } = req.body;
 
-        let role: "admin" | "user" = "user"; // Default to "user"
-        if (req.headers["x-frontend-origin"] === "admin") {
-            role = "admin";
-        }
+        // ✅ Assign Role Dynamically
+        let role: "admin" | "user" = req.headers["x-role"] === "admin" ? "admin" : "user";
 
         // ✅ Validate required fields
         if (!email || !password || !userName) {
-            console.error("❌ Validation Failed: Missing required fields");
             res.status(400).json({ message: "Username, email, and password are required." });
             return;
         }
 
-        // ✅ Register user (Admin or Regular User)
+        // ✅ Register user
         const newUser = await registerUser(
             email,
             password,
@@ -50,15 +57,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             emergencyContactDetails || ""
         );
 
-        res.status(201).json({ message: `${role.charAt(0).toUpperCase() + role.slice(1)} registered successfully`, user: newUser });
+        res.status(201).json({ message: `${role} registered successfully`, user: newUser });
     } catch (error) {
         console.error("❌ Registration Error:", error);
         res.status(400).json({ message: error instanceof Error ? error.message : "An error occurred" });
     }
 };
 
-
-
+/**
+ * Login User and Generate Tokens
+ */
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password } = req.body;
@@ -68,8 +76,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const { token, user } = await authenticateUser(email, password);
-        res.status(200).json({ message: "Login successful", token, user });
+        const { accessToken, refreshToken, user } = await authenticateUser(email, password);
+        
+        res.status(200).json({ message: "Login successful", accessToken, refreshToken, user });
     } catch (error) {
         console.error("Login Error:", error);
         res.status(400).json({ message: error instanceof Error ? error.message : "Invalid credentials" });
@@ -94,6 +103,40 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
         res.status(200).json({ message: "Profile fetched successfully", user });
     } catch (error) {
         console.error("Error fetching profile:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+/**
+ * Refresh Token API
+ */
+export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const refreshToken = req.headers["authorization"]?.split(" ")[1];
+
+        if (!refreshToken) {
+            res.status(401).json({ message: "No refresh token provided" });
+            return;
+        }
+
+        jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err, decoded) => {
+            if (err) {
+                console.error("Refresh token error:", err);
+                res.status(401).json({ message: "Invalid or expired refresh token" });
+                return;
+            }
+
+            // 🔹 Generate a new access token
+            const newAccessToken = jwt.sign(
+                { userId: (decoded as JwtPayload).userId, role: (decoded as JwtPayload).role },
+                JWT_SECRET,
+                { expiresIn: "6h" } 
+            );
+
+            res.status(200).json({ accessToken: newAccessToken });
+        });
+    } catch (error) {
+        console.error("❌ Error refreshing token:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 };

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "your-refresh-secret-key";
 
 /**
  * Register a new user or admin
@@ -57,7 +58,9 @@ export const authenticateUser = async (email: string, inputPassword: string) => 
   const isMatch = await bcrypt.compare(inputPassword, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
 
-  const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
+  // 🔹 Generate Access Token (6h) & Refresh Token (7d)
+  const accessToken = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "6h" });
+  const refreshToken = jwt.sign({ userId: user._id }, JWT_REFRESH_SECRET, { expiresIn: "7d" });
 
-  return { token, user };
+  return { accessToken, refreshToken, user };
 };
