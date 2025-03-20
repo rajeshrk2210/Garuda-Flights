@@ -1,11 +1,19 @@
-import { Router } from "express";
-import { register, login, getProfile } from "../controllers/authController";
+import express from "express";
+import { register, login, getProfile, refreshToken } from "../controllers/authController";
 import { authenticateUser } from "../middlewares/authMiddleware";
 
-const router = Router();
+const router = express.Router();
 
+/** ✅ Register Route */
 router.post("/register", register);
+
+/** ✅ Login Route */
 router.post("/login", login);
-router.get("/profile", authenticateUser, getProfile); // Protected route
+
+/** ✅ Profile Route (Protected) */
+router.get("/profile", authenticateUser, getProfile);
+
+/** ✅ Refresh Token Route */
+router.post("/refresh-token", refreshToken);
 
 export default router;
