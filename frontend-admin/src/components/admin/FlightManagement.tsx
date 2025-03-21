@@ -40,37 +40,43 @@ const formatTime = (timeStr: string): string => {
 };
 
 /** 🔹 Calculate Arrival Date & Time */
-/** 🔹 Calculate Arrival Date & Time (Ensuring Correct Local Time) */
+																	   
 const calculateArrivalDetails = (departureDate: string, departureTime: string, routeDuration: string) => {
   if (!departureDate || !departureTime || !routeDuration) return { arrivalDate: "", arrivalTime: "" };
 
-  // ✅ Parse date and time as local time
+										  
   const [year, month, day] = departureDate.split("-").map(Number);
   const [depHours, depMinutes] = departureTime.split(":").map(Number);
   const [durationHours, durationMinutes] = routeDuration.split(":").map(Number);
 
-  // ✅ Create a new Date object without automatic UTC conversion
+																  
   const depDateTime = new Date(year, month - 1, day, depHours, depMinutes);
 
-  console.log("📅 Departure DateTime (Before Adding Duration):", depDateTime.toLocaleString());
+																								 
 
-  // ✅ Add duration correctly (ensuring local time handling)
+															  
   depDateTime.setHours(depDateTime.getHours() + durationHours);
   depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
 
-  console.log("🛬 Arrival DateTime (After Adding Duration):", depDateTime.toLocaleString());
+  return {
 
-  // ✅ Format arrival date and time correctly
-  const arrivalDate = depDateTime.toISOString().split("T")[0]; // YYYY-MM-DD format
-  const arrivalTime = depDateTime.toTimeString().slice(0, 5); // HH:MM format
+											   
+    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
+    arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
 
-  return { arrivalDate, arrivalTime };
+  };
 };
 
 const FlightManagement = () => {
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
+  const [searchParams, setSearchParams] = useState({
+    aircraftNumber: "",
+    startLocation: "",
+    endLocation: "",
+    type: "All", // Upcoming, Previous, or All
+  });
 
   const [newFlight, setNewFlight] = useState({
     aircraftNumber: "",
@@ -121,18 +127,19 @@ const FlightManagement = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/flights", {
+      const queryParams = new URLSearchParams();
+      if (searchParams.aircraftNumber) queryParams.append("aircraftNumber", searchParams.aircraftNumber);
+      if (searchParams.startLocation) queryParams.append("startLocation", searchParams.startLocation);
+      if (searchParams.endLocation) queryParams.append("endLocation", searchParams.endLocation);
+      if (searchParams.type !== "All") queryParams.append("type", searchParams.type);
+
+      const response = await fetch(`http://localhost:5000/api/flights?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       let data: Flight[] = await response.json();
 
-      const updatedFlights: Flight[] = data.map((flight) => ({
-        ...flight,
-        route: flight.route || { startLocation: "Unknown", endLocation: "Unknown", duration: "00:00" },
-      }));
-
-      setFlights(updatedFlights);
+      setFlights(data);
     } catch (error) {
       console.error("❌ Error fetching flights:", error);
     }
@@ -141,22 +148,7 @@ const FlightManagement = () => {
   /** 🔹 Handle Input Changes */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const updatedFlight = { ...newFlight, [name]: value };
-
-    // Update Arrival Date & Time if Departure Date/Time or Route changes
-    if (name === "departureDate" || name === "departureTime" || name === "routeId") {
-      const selectedRoute = routes.find((route) => route._id === updatedFlight.routeId);
-      if (selectedRoute) {
-        const { arrivalDate, arrivalTime } = calculateArrivalDetails(
-          updatedFlight.departureDate,
-          updatedFlight.departureTime,
-          selectedRoute.duration
-        );
-        updatedFlight.arrivalDate = arrivalDate;
-        updatedFlight.arrivalTime = arrivalTime;
-      }
-    }    
-    setNewFlight(updatedFlight);
+    setNewFlight((prev) => ({ ...prev, [name]: value }));
   };
 
   /** 🔹 Add Flight */
@@ -209,11 +201,11 @@ const FlightManagement = () => {
   return (
     <div className="bg-white p-6 rounded shadow-lg mb-8">
       <h3 className="text-xl font-semibold mb-4">✈️ Flight Management</h3>
-
+  
       {/* Add Flight Section */}
       <div className="mb-6 p-4 border rounded bg-gray-50">
         <h4 className="text-lg font-semibold mb-2">➕ Add Flight</h4>
-
+  
         <label>Aircraft</label>
         <select name="aircraftNumber" className="border p-2 w-full mb-2" value={newFlight.aircraftNumber} onChange={handleInputChange}>
           <option value="">Select Aircraft</option>
@@ -221,7 +213,7 @@ const FlightManagement = () => {
             <option key={aircraft.aircraftNumber} value={aircraft.aircraftNumber}>{aircraft.aircraftNumber}</option>
           ))}
         </select>
-
+  
         <label>Route</label>
         <select name="routeId" className="border p-2 w-full mb-2" value={newFlight.routeId} onChange={handleInputChange}>
           <option value="">Select Route</option>
@@ -229,23 +221,56 @@ const FlightManagement = () => {
             <option key={route._id} value={route._id}>{route.startLocation} → {route.endLocation}</option>
           ))}
         </select>
-
+  
         <label>Departure Date</label>
         <input type="date" name="departureDate" className="border p-2 w-full mb-2" value={newFlight.departureDate} onChange={handleInputChange} />
-
+  
         <label>Departure Time</label>
         <input type="time" name="departureTime" className="border p-2 w-full mb-2" value={newFlight.departureTime} onChange={handleInputChange} />
-
+  
         <label>Economy Price</label>
         <input type="text" name="economyPrice" className="border p-2 w-full mb-2" value={newFlight.economyPrice} onChange={handleInputChange} />
-
+  
         <label>Premium Price</label>
         <input type="text" name="premiumPrice" className="border p-2 w-full mb-2" value={newFlight.premiumPrice} onChange={handleInputChange} />
-
+  
         <button onClick={addFlight} className="bg-blue-500 text-white px-4 py-2 rounded">Add Flight</button>
       </div>
+  
+      {/* Search Flights Section */}
+      <div className="mb-6 p-4 border rounded bg-gray-50">
+        <h4 className="text-lg font-semibold mb-2">🔍 Search Flights</h4>
+        
+        <input type="text" placeholder="Aircraft Number" className="border p-2 w-full mb-2"
+          value={searchParams.aircraftNumber} onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })} />
+  
+        <select className="border p-2 w-full mb-2" value={searchParams.startLocation}
+          onChange={(e) => setSearchParams({ ...searchParams, startLocation: e.target.value })}>
+          <option value="">Select Start Location</option>
+          {routes.map((route) => (
+            <option key={route._id} value={route.startLocation}>{route.startLocation}</option>
+          ))}
+        </select>
+  
+        <select className="border p-2 w-full mb-2" value={searchParams.endLocation}
+          onChange={(e) => setSearchParams({ ...searchParams, endLocation: e.target.value })}>
+          <option value="">Select End Location</option>
+          {routes.map((route) => (
+            <option key={route._id} value={route.endLocation}>{route.endLocation}</option>
+          ))}
+        </select>
+  
+        <select className="border p-2 w-full mb-2" value={searchParams.type}
+          onChange={(e) => setSearchParams({ ...searchParams, type: e.target.value })}>
+          <option value="All">All Flights</option>
+          <option value="Upcoming">Upcoming Flights</option>
+          <option value="Previous">Previous Flights</option>
+        </select>
+  
+        <button onClick={fetchFlights} className="bg-green-500 text-white px-4 py-2 rounded">Search Flights</button>
+      </div>
     </div>
-  );
+  );  
 };
 
 export default FlightManagement;

@@ -1,43 +1,56 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
-import authRoutes from "./routes/authRoutes";
-import flightRoutes from "./routes/flightRoutes";
-import routeRoutes from "./routes/routeRoutes";
-import aircraftRoutes from "./routes/aircraftRoutes";
 import fs from "fs";
 import cors from "cors";
 import dotenv from "dotenv";
 
-dotenv.config();
+// ✅ Import Routes
+import authRoutes from "./routes/authRoutes";
+import flightRoutes from "./routes/flightRoutes";
+import routeRoutes from "./routes/routeRoutes";
+import aircraftRoutes from "./routes/aircraftRoutes";
+
+dotenv.config(); // ✅ Load environment variables
 const app = express();
 
-// Middleware
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// Load Swagger API documentation safely
+// ✅ Load Swagger API documentation safely
 let swaggerDocument: any;
 try {
-  const swaggerData = fs.readFileSync("./src/docs/swagger.json", "utf-8");
-  swaggerDocument = JSON.parse(swaggerData);
+  const swaggerPath = "./src/docs/swagger.json";
+  if (fs.existsSync(swaggerPath)) {
+    const swaggerData = fs.readFileSync(swaggerPath, "utf-8");
+    swaggerDocument = JSON.parse(swaggerData);
+  } else {
+    console.error("⚠️ Swagger JSON file not found.");
+    swaggerDocument = {};
+  }
 } catch (error) {
-  console.error("Error loading Swagger JSON:", error);
-  swaggerDocument = {}; // Fallback to empty object to prevent crashes
+  console.error("❌ Error loading Swagger JSON:", error);
+  swaggerDocument = {};
 }
 
+// ✅ Swagger API Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// ✅ Ensure aircraft route is correctly registered
+// ✅ Register API Routes
 app.use("/api/aircrafts", aircraftRoutes);
-
 app.use("/auth", authRoutes);
 app.use("/api/flights", flightRoutes);
-app.use("/api/routes", routeRoutes); // ✅ Correct API route
+app.use("/api/routes", routeRoutes);
 
-
-// Test route
+// ✅ Test route
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({ message: "Welcome to Garuda Flights API" });
+});
+
+// ✅ Global Error Handling Middleware (Prevents Crashes)
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error("❌ Internal Server Error:", err);
+  res.status(500).json({ message: "Internal Server Error" });
 });
 
 export default app;
