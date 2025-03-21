@@ -14,10 +14,14 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [admin, setAdmin] = useState<Admin | null>(() => {
+  const [admin, setAdmin] = useState<Admin | null>(null);
+
+  useEffect(() => {
     const storedAdmin = localStorage.getItem("admin");
-    return storedAdmin ? JSON.parse(storedAdmin) : null;
-  });
+    if (storedAdmin) {
+      setAdmin(JSON.parse(storedAdmin));
+    }
+  }, []);
 
   const login = (token: string, admin: Admin) => {
     localStorage.setItem("token", token);
@@ -29,9 +33,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("admin");
     setAdmin(null);
-    window.location.href = "/login"; // ✅ Redirect after logout
+    window.location.href = "/login";
   };
-  
 
   return (
     <AuthContext.Provider value={{ admin, login, logout }}>
