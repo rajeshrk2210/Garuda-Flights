@@ -40,27 +40,27 @@ const formatTime = (timeStr: string): string => {
 };
 
 /** 🔹 Calculate Arrival Date & Time */
-																	   
+
 const calculateArrivalDetails = (departureDate: string, departureTime: string, routeDuration: string) => {
   if (!departureDate || !departureTime || !routeDuration) return { arrivalDate: "", arrivalTime: "" };
 
-										  
+
   const [year, month, day] = departureDate.split("-").map(Number);
   const [depHours, depMinutes] = departureTime.split(":").map(Number);
   const [durationHours, durationMinutes] = routeDuration.split(":").map(Number);
 
-																  
+
   const depDateTime = new Date(year, month - 1, day, depHours, depMinutes);
 
-																								 
 
-															  
+
+
   depDateTime.setHours(depDateTime.getHours() + durationHours);
   depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
 
   return {
 
-											   
+
     arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
     arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
 
@@ -137,6 +137,8 @@ const FlightManagement = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log("🔐 Token used in request:", token);
+
       let data: Flight[] = await response.json();
 
       setFlights(data);
@@ -201,11 +203,11 @@ const FlightManagement = () => {
   return (
     <div className="bg-white p-6 rounded shadow-lg mb-8">
       <h3 className="text-xl font-semibold mb-4">✈️ Flight Management</h3>
-  
+
       {/* Add Flight Section */}
       <div className="mb-6 p-4 border rounded bg-gray-50">
         <h4 className="text-lg font-semibold mb-2">➕ Add Flight</h4>
-  
+
         <label>Aircraft</label>
         <select name="aircraftNumber" className="border p-2 w-full mb-2" value={newFlight.aircraftNumber} onChange={handleInputChange}>
           <option value="">Select Aircraft</option>
@@ -213,7 +215,7 @@ const FlightManagement = () => {
             <option key={aircraft.aircraftNumber} value={aircraft.aircraftNumber}>{aircraft.aircraftNumber}</option>
           ))}
         </select>
-  
+
         <label>Route</label>
         <select name="routeId" className="border p-2 w-full mb-2" value={newFlight.routeId} onChange={handleInputChange}>
           <option value="">Select Route</option>
@@ -221,29 +223,29 @@ const FlightManagement = () => {
             <option key={route._id} value={route._id}>{route.startLocation} → {route.endLocation}</option>
           ))}
         </select>
-  
+
         <label>Departure Date</label>
         <input type="date" name="departureDate" className="border p-2 w-full mb-2" value={newFlight.departureDate} onChange={handleInputChange} />
-  
+
         <label>Departure Time</label>
         <input type="time" name="departureTime" className="border p-2 w-full mb-2" value={newFlight.departureTime} onChange={handleInputChange} />
-  
+
         <label>Economy Price</label>
         <input type="text" name="economyPrice" className="border p-2 w-full mb-2" value={newFlight.economyPrice} onChange={handleInputChange} />
-  
+
         <label>Premium Price</label>
         <input type="text" name="premiumPrice" className="border p-2 w-full mb-2" value={newFlight.premiumPrice} onChange={handleInputChange} />
-  
+
         <button onClick={addFlight} className="bg-blue-500 text-white px-4 py-2 rounded">Add Flight</button>
       </div>
-  
+
       {/* Search Flights Section */}
       <div className="mb-6 p-4 border rounded bg-gray-50">
         <h4 className="text-lg font-semibold mb-2">🔍 Search Flights</h4>
-        
+
         <input type="text" placeholder="Aircraft Number" className="border p-2 w-full mb-2"
           value={searchParams.aircraftNumber} onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })} />
-  
+
         <select className="border p-2 w-full mb-2" value={searchParams.startLocation}
           onChange={(e) => setSearchParams({ ...searchParams, startLocation: e.target.value })}>
           <option value="">Select Start Location</option>
@@ -251,7 +253,7 @@ const FlightManagement = () => {
             <option key={route._id} value={route.startLocation}>{route.startLocation}</option>
           ))}
         </select>
-  
+
         <select className="border p-2 w-full mb-2" value={searchParams.endLocation}
           onChange={(e) => setSearchParams({ ...searchParams, endLocation: e.target.value })}>
           <option value="">Select End Location</option>
@@ -259,18 +261,61 @@ const FlightManagement = () => {
             <option key={route._id} value={route.endLocation}>{route.endLocation}</option>
           ))}
         </select>
-  
+
         <select className="border p-2 w-full mb-2" value={searchParams.type}
           onChange={(e) => setSearchParams({ ...searchParams, type: e.target.value })}>
           <option value="All">All Flights</option>
           <option value="Upcoming">Upcoming Flights</option>
           <option value="Previous">Previous Flights</option>
         </select>
-  
+
         <button onClick={fetchFlights} className="bg-green-500 text-white px-4 py-2 rounded">Search Flights</button>
       </div>
+
+      {/* Display Flights */}
+      <div className="mb-6 p-4 border rounded bg-gray-50">
+        <h4 className="text-lg font-semibold mb-4">🛫 Flight Results</h4>
+
+        {flights.length === 0 ? (
+          <p className="text-gray-500">No flights found.</p>
+        ) : (
+          <table className="w-full text-left border border-gray-300">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="p-2 border">Aircraft</th>
+                <th className="p-2 border">Start Location</th>
+                <th className="p-2 border">End Location</th>
+                <th className="p-2 border">Departure Date</th>
+                <th className="p-2 border">Departure Time</th>
+                <th className="p-2 border">Arrival Date</th>
+                <th className="p-2 border">Arrival Time</th>
+                <th className="p-2 border">Economy Price</th>
+                <th className="p-2 border">Premium Price</th>
+                <th className="p-2 border">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flights.map((flight) => (
+                <tr key={flight._id}>
+                  <td className="p-2 border">{flight.aircraftNumber}</td>
+                  <td className="p-2 border">{flight.route?.startLocation || "N/A"}</td>
+                  <td className="p-2 border">{flight.route?.endLocation || "N/A"}</td>
+                  <td className="p-2 border">{formatDate(flight.departureDate)}</td>
+                  <td className="p-2 border">{formatTime(flight.departureTime)}</td>
+                  <td className="p-2 border">{formatDate(flight.arrivalDate)}</td>
+                  <td className="p-2 border">{formatTime(flight.arrivalTime)}</td>
+                  <td className="p-2 border">${flight.economyPrice}</td>
+                  <td className="p-2 border">${flight.premiumPrice}</td>
+                  <td className="p-2 border">{flight.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
     </div>
-  );  
+  );
 };
 
 export default FlightManagement;

@@ -26,12 +26,14 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        login(data.token, data.user);
+        console.log("✅ Token from backend:", data.accessToken);
+        login(data.accessToken, data.user); // ✅ use accessToken here
         navigate("/dashboard");
       } else {
-        setError(data.message);
+        setError(data.message || "Login failed.");
       }
     } catch (error) {
+      console.error("❌ Login error:", error);
       setError("Login failed. Please try again.");
     }
   };
