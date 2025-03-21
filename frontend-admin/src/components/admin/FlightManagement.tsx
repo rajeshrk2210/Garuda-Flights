@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Interfaces
 interface Aircraft {
@@ -24,6 +25,8 @@ interface Flight {
   premiumPrice: string;
   status: string;
 }
+
+
 
 /** 🔹 Convert Date to Readable Format */
 const formatDate = (dateStr: string): string => {
@@ -68,6 +71,9 @@ const calculateArrivalDetails = (departureDate: string, departureTime: string, r
 };
 
 const FlightManagement = () => {
+  // Inside FlightManagement component
+  const navigate = useNavigate();
+
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -292,6 +298,7 @@ const FlightManagement = () => {
                 <th className="p-2 border">Economy Price</th>
                 <th className="p-2 border">Premium Price</th>
                 <th className="p-2 border">Status</th>
+                <th className="p-2 border">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -307,6 +314,14 @@ const FlightManagement = () => {
                   <td className="p-2 border">${flight.economyPrice}</td>
                   <td className="p-2 border">${flight.premiumPrice}</td>
                   <td className="p-2 border">{flight.status}</td>
+                  <td className="p-2 border">
+                    <button
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                      onClick={() => navigate(`/flights/${flight._id}`)}
+                    >
+                      Select
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

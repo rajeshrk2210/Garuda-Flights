@@ -8,6 +8,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import EditFlight from "./pages/EditFlight";
 
 const App = () => {
   const authContext = useContext(AuthContext);
@@ -24,7 +25,8 @@ const App = () => {
         <Route path="/dashboard" element={admin ? <Dashboard /> : <Navigate to="/login" />} />
         <Route path="/admin" element={admin ? <Admin /> : <Navigate to="/login" />} />
         <Route path="/profile" element={admin ? <Profile /> : <Navigate to="/login" />} />
-        <Route path="*" element={<Navigate to={admin ? "/dashboard" : "/"} />} />
+        <Route path="/flights/:flightId" element={admin ? <EditFlight /> : <Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to={admin ? "/dashboard" : "/"} />} />        
       </Routes>
     </Router>
   );

@@ -81,7 +81,6 @@ export const getFlights = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-
 export const createFlight = async (req: Request, res: Response): Promise<void> => {
   console.log("📩 Incoming Flight Request:", req.body);
 
@@ -122,3 +121,67 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getFlightById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const flight = await Flight.findById(req.params.id).populate("route");
+    if (!flight) {
+      res.status(404).json({ message: "Flight not found" });
+      return;
+    }
+    res.status(200).json(flight);
+  } catch (error) {
+    console.error("❌ Error fetching flight by ID:", error);
+    res.status(500).json({ message: "Error fetching flight" });
+  }
+};
+
+/** ✅ Update Flight (Admin only) */
+export const updateFlight = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const flightId = req.params.id;
+    const { departureDate, departureTime } = req.body;
+
+    const flight = await Flight.findById(flightId);
+    if (!flight) {
+      res.status(404).json({ message: "Flight not found." });
+      return;
+    }
+
+    const currentDateTime = new Date(`${flight.departureDate}T${flight.departureTime}`);
+    const newDateTime = new Date(`${departureDate}T${departureTime}`);
+
+    if (newDateTime <= currentDateTime) {
+      res.status(400).json({ message: "New departure must be later than current departure time." });
+      return;
+    }
+
+    // Update departure
+    flight.departureDate = departureDate;
+    flight.departureTime = departureTime;
+    flight.status = "DELAYED";
+
+    // Recalculate arrival
+    const route = await Route.findById(flight.route);
+    if (!route) {
+      res.status(404).json({ message: "Associated route not found." });
+      return;
+    }
+
+    const [hours, minutes] = route.duration.split(":").map(Number);
+    const depDateTime = new Date(`${departureDate}T${departureTime}`);
+    depDateTime.setHours(depDateTime.getHours() + hours);
+    depDateTime.setMinutes(depDateTime.getMinutes() + minutes);
+
+    flight.arrivalDate = depDateTime.toISOString().split("T")[0];
+    flight.arrivalTime = depDateTime.toTimeString().slice(0, 5);
+
+    await flight.save();
+
+    res.status(200).json({ message: "Flight updated successfully", flight });
+  } catch (error) {
+    console.error("❌ Error updating flight:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
