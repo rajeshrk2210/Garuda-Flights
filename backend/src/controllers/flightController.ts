@@ -140,7 +140,7 @@ export const getFlightById = async (req: Request, res: Response): Promise<void> 
 export const updateFlight = async (req: Request, res: Response): Promise<void> => {
   try {
     const flightId = req.params.id;
-    const { departureDate, departureTime } = req.body;
+    const { departureDate, departureTime, status } = req.body;
 
     const flight = await Flight.findById(flightId);
     if (!flight) {
@@ -148,8 +148,27 @@ export const updateFlight = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    // Cancel flight if status is passed
+    if (status === "CANCELLED") {
+      flight.status = "CANCELLED";
+      await flight.save();
+      res.status(200).json({ message: "Flight cancelled successfully", flight });
+      return;
+    }
+
+    // Validate date/time before proceeding
+    if (!departureDate || !departureTime) {
+      res.status(400).json({ message: "Departure date and time are required for updating flight." });
+      return;
+    }
+
     const currentDateTime = new Date(`${flight.departureDate}T${flight.departureTime}`);
     const newDateTime = new Date(`${departureDate}T${departureTime}`);
+
+    if (isNaN(newDateTime.getTime())) {
+      res.status(400).json({ message: "Invalid departure date or time." });
+      return;
+    }
 
     if (newDateTime <= currentDateTime) {
       res.status(400).json({ message: "New departure must be later than current departure time." });
@@ -163,8 +182,8 @@ export const updateFlight = async (req: Request, res: Response): Promise<void> =
 
     // Recalculate arrival
     const route = await Route.findById(flight.route);
-    if (!route) {
-      res.status(404).json({ message: "Associated route not found." });
+    if (!route || !route.duration) {
+      res.status(404).json({ message: "Associated route not found or missing duration." });
       return;
     }
 
@@ -172,6 +191,11 @@ export const updateFlight = async (req: Request, res: Response): Promise<void> =
     const depDateTime = new Date(`${departureDate}T${departureTime}`);
     depDateTime.setHours(depDateTime.getHours() + hours);
     depDateTime.setMinutes(depDateTime.getMinutes() + minutes);
+
+    if (isNaN(depDateTime.getTime())) {
+      res.status(400).json({ message: "Invalid calculated arrival time." });
+      return;
+    }
 
     flight.arrivalDate = depDateTime.toISOString().split("T")[0];
     flight.arrivalTime = depDateTime.toTimeString().slice(0, 5);
