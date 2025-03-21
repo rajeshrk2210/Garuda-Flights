@@ -3,9 +3,10 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
+
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-interface AuthRequest extends Request {
+export interface AuthRequest extends Request {
   user?: JwtPayload;
 }
 
@@ -13,16 +14,26 @@ interface AuthRequest extends Request {
 export const authenticateUser = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const authHeader = req.headers["authorization"];
+
+    // ✅ Validate that header exists and starts with 'Bearer '
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       res.status(401).json({ message: "Unauthorized: No valid token provided." });
       return;
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    req.user = decoded;
 
-    next(); // ✅ Proceed to next middleware or controller
+    // ✅ Check for invalid or malformed token values
+    if (!token || token === "null" || token === "undefined") {
+      res.status(401).json({ message: "Unauthorized: Invalid token." });
+      return;
+    }
+
+    // ✅ Verify token
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+
+    req.user = decoded; // Attach user to request
+    next(); // ✅ Move to next middleware or controller
   } catch (error: any) {
     console.error("❌ Token verification failed:", error);
 
