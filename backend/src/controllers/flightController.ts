@@ -209,3 +209,49 @@ export const updateFlight = async (req: Request, res: Response): Promise<void> =
   }
 };
 
+export const getFlightStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const today = new Date();
+    const startOfToday = new Date(today.toDateString()); // Midnight today
+    const endOfToday = new Date(startOfToday);
+    endOfToday.setDate(endOfToday.getDate() + 1); // Start of tomorrow
+
+    // Start of week (Monday)
+    const startOfWeek = new Date(startOfToday);
+    const dayOfWeek = startOfToday.getDay(); // 0 = Sunday, 1 = Monday, ...
+    const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Make Monday start
+    startOfWeek.setDate(startOfWeek.getDate() - offset);
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const getCount = async (match: { start: Date; end: Date; extra: any }) => {
+      return Flight.countDocuments({
+        departureDate: {
+          $gte: match.start.toISOString().split("T")[0],
+          $lte: match.end.toISOString().split("T")[0],
+        },
+        ...match.extra,
+      });
+    };
+
+    const stats = {
+      today: await getCount({ start: startOfToday, end: endOfToday, extra: {} }),
+      week: await getCount({ start: startOfWeek, end: endOfToday, extra: {} }),
+      month: await getCount({ start: startOfMonth, end: endOfToday, extra: {} }),
+
+      cancelledToday: await getCount({ start: startOfToday, end: endOfToday, extra: { status: "CANCELLED" } }),
+      cancelledWeek: await getCount({ start: startOfWeek, end: endOfToday, extra: { status: "CANCELLED" } }),
+      cancelledMonth: await getCount({ start: startOfMonth, end: endOfToday, extra: { status: "CANCELLED" } }),
+
+      delayedToday: await getCount({ start: startOfToday, end: endOfToday, extra: { status: "DELAYED" } }),
+      delayedWeek: await getCount({ start: startOfWeek, end: endOfToday, extra: { status: "DELAYED" } }),
+      delayedMonth: await getCount({ start: startOfMonth, end: endOfToday, extra: { status: "DELAYED" } }),
+    };
+
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error("❌ Error fetching flight stats:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
