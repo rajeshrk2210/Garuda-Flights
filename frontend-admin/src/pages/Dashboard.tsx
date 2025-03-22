@@ -15,12 +15,6 @@ const Dashboard = () => {
     delayedWeek: 0,
     delayedMonth: 0,
   });
-  const [searchParams, setSearchParams] = useState({
-    aircraftNumber: "",
-    departure: "",
-    arrival: "",
-    date: "",
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,19 +23,19 @@ const Dashboard = () => {
         const locationsResponse = await fetch("http://localhost:5000/api/routes/locations");
         const routesResponse = await fetch("http://localhost:5000/api/routes/count");
         const flightsResponse = await fetch("http://localhost:5000/api/flights/stats");
-  
+
         setAircrafts(await aircraftResponse.json());
-        setLocations(await locationsResponse.json());
+        const locationData: string[] = await locationsResponse.json();
+        setLocations(locationData.length);
         setRoutes(await routesResponse.json());
         setFlights(await flightsResponse.json());
       } catch (error) {
         console.error("❌ Dashboard API error:", error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
 
   return (
     <div className="p-6">
@@ -71,35 +65,6 @@ const Dashboard = () => {
         <div className="bg-orange-500 text-white p-4 rounded-lg">Delayed Today: {flights.delayedToday}</div>
         <div className="bg-orange-500 text-white p-4 rounded-lg">Delayed This Week: {flights.delayedWeek}</div>
         <div className="bg-orange-500 text-white p-4 rounded-lg">Delayed This Month: {flights.delayedMonth}</div>
-      </div>
-
-      {/* Flight Search */}
-      <div className="mt-6 bg-gray-100 p-4 rounded-lg">
-        <h2 className="text-2xl font-bold">Search Flights</h2>
-        <div className="grid grid-cols-4 gap-4 mt-4">
-          <input
-            type="text"
-            placeholder="Aircraft Number"
-            value={searchParams.aircraftNumber}
-            onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })}
-            className="p-2 border rounded"
-          />
-          <input
-            type="text"
-            placeholder="Departure"
-            value={searchParams.departure}
-            onChange={(e) => setSearchParams({ ...searchParams, departure: e.target.value })}
-            className="p-2 border rounded"
-          />
-          <input
-            type="text"
-            placeholder="Arrival"
-            value={searchParams.arrival}
-            onChange={(e) => setSearchParams({ ...searchParams, arrival: e.target.value })}
-            className="p-2 border rounded"
-          />
-          <button className="bg-blue-500 text-white p-2 rounded">Search</button>
-        </div>
       </div>
     </div>
   );
