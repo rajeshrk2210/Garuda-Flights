@@ -214,12 +214,12 @@ export const getFlightStats = async (req: Request, res: Response): Promise<void>
     const today = new Date();
     const startOfToday = new Date(today.toDateString()); // Midnight today
     const endOfToday = new Date(startOfToday);
-    endOfToday.setDate(endOfToday.getDate() + 1); // Start of tomorrow
+    endOfToday.setDate(endOfToday.getDate() + 1);
 
     // Start of week (Monday)
     const startOfWeek = new Date(startOfToday);
-    const dayOfWeek = startOfToday.getDay(); // 0 = Sunday, 1 = Monday, ...
-    const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Make Monday start
+    const dayOfWeek = startOfToday.getDay(); // Sunday=0
+    const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     startOfWeek.setDate(startOfWeek.getDate() - offset);
 
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -234,10 +234,13 @@ export const getFlightStats = async (req: Request, res: Response): Promise<void>
       });
     };
 
+    // Flights excluding CANCELLED
+    const activeStatuses = { status: { $in: ["OK", "DELAYED"] } };
+
     const stats = {
-      today: await getCount({ start: startOfToday, end: endOfToday, extra: {} }),
-      week: await getCount({ start: startOfWeek, end: endOfToday, extra: {} }),
-      month: await getCount({ start: startOfMonth, end: endOfToday, extra: {} }),
+      today: await getCount({ start: startOfToday, end: endOfToday, extra: activeStatuses }),
+      week: await getCount({ start: startOfWeek, end: endOfToday, extra: activeStatuses }),
+      month: await getCount({ start: startOfMonth, end: endOfToday, extra: activeStatuses }),
 
       cancelledToday: await getCount({ start: startOfToday, end: endOfToday, extra: { status: "CANCELLED" } }),
       cancelledWeek: await getCount({ start: startOfWeek, end: endOfToday, extra: { status: "CANCELLED" } }),
@@ -254,4 +257,5 @@ export const getFlightStats = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
