@@ -52,6 +52,25 @@ export const getRoutes = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getLocations = (req: Request, res: Response): void => {
-  res.status(200).json(locations);
+export const getLocations = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const startLocations = await Route.distinct("startLocation");
+    const endLocations = await Route.distinct("endLocation");
+
+    const uniqueLocations = Array.from(new Set([...startLocations, ...endLocations]));
+    res.status(200).json(uniqueLocations);
+  } catch (error) {
+    console.error("❌ Error fetching locations:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRouteCount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const count = await Route.countDocuments();
+    res.status(200).json(count);
+  } catch (error) {
+    console.error("❌ Error counting routes:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

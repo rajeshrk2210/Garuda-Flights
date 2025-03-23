@@ -15,46 +15,50 @@ const Dashboard = () => {
     delayedWeek: 0,
     delayedMonth: 0,
   });
-  const [searchParams, setSearchParams] = useState({
-    aircraftNumber: "",
-    departure: "",
-    arrival: "",
-    date: "",
-  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const aircraftResponse = await fetch("http://localhost:5000/api/aircrafts/count");
-        const locationsResponse = await fetch("http://localhost:5000/api/routes/locations");
-        const routesResponse = await fetch("http://localhost:5000/api/routes/count");
-        const flightsResponse = await fetch("http://localhost:5000/api/flights/stats");
-  
-        setAircrafts(await aircraftResponse.json());
-        setLocations(await locationsResponse.json());
-        setRoutes(await routesResponse.json());
-        setFlights(await flightsResponse.json());
+        const token = localStorage.getItem("token");
+
+        const [aircraftRes, locationsRes, routesRes, flightsRes] = await Promise.all([
+          fetch("http://localhost:5000/api/aircrafts/count"),
+          fetch("http://localhost:5000/api/routes/locations"),
+          fetch("http://localhost:5000/api/routes/count"),
+          fetch("http://localhost:5000/api/flights/stats", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
+
+        const aircraftCount = await aircraftRes.json();
+        const locationData: string[] = await locationsRes.json();
+        const routeCount = await routesRes.json();
+        const flightStats = await flightsRes.json();
+
+        setAircrafts(aircraftCount);
+        setLocations(locationData.length);
+        setRoutes(routeCount);
+        setFlights(flightStats);
       } catch (error) {
         console.error("❌ Dashboard API error:", error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold">Admin Dashboard</h1>
 
-      {/* Statistics */}
       <div className="grid grid-cols-3 gap-6 mt-6">
         <div className="bg-blue-500 text-white p-4 rounded-lg">Aircrafts: {aircrafts}</div>
         <div className="bg-green-500 text-white p-4 rounded-lg">Locations Covered: {locations}</div>
         <div className="bg-purple-500 text-white p-4 rounded-lg">Routes: {routes}</div>
       </div>
 
-      {/* Flight Stats */}
       <div className="grid grid-cols-3 gap-6 mt-6">
         <div className="bg-yellow-500 text-white p-4 rounded-lg">Flights Today: {flights.today}</div>
         <div className="bg-yellow-500 text-white p-4 rounded-lg">Flights This Week: {flights.week}</div>
@@ -71,35 +75,6 @@ const Dashboard = () => {
         <div className="bg-orange-500 text-white p-4 rounded-lg">Delayed Today: {flights.delayedToday}</div>
         <div className="bg-orange-500 text-white p-4 rounded-lg">Delayed This Week: {flights.delayedWeek}</div>
         <div className="bg-orange-500 text-white p-4 rounded-lg">Delayed This Month: {flights.delayedMonth}</div>
-      </div>
-
-      {/* Flight Search */}
-      <div className="mt-6 bg-gray-100 p-4 rounded-lg">
-        <h2 className="text-2xl font-bold">Search Flights</h2>
-        <div className="grid grid-cols-4 gap-4 mt-4">
-          <input
-            type="text"
-            placeholder="Aircraft Number"
-            value={searchParams.aircraftNumber}
-            onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })}
-            className="p-2 border rounded"
-          />
-          <input
-            type="text"
-            placeholder="Departure"
-            value={searchParams.departure}
-            onChange={(e) => setSearchParams({ ...searchParams, departure: e.target.value })}
-            className="p-2 border rounded"
-          />
-          <input
-            type="text"
-            placeholder="Arrival"
-            value={searchParams.arrival}
-            onChange={(e) => setSearchParams({ ...searchParams, arrival: e.target.value })}
-            className="p-2 border rounded"
-          />
-          <button className="bg-blue-500 text-white p-2 rounded">Search</button>
-        </div>
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ export interface IUser extends Document {
 
 const UserSchema: Schema = new Schema({
   userName: { type: String, required: true, trim: true }, // ❌ Removed `unique: true`
-  email: { type: String, required: true, unique: true }, // ✅ Only email is unique
+  email: { type: String, required: true}, // ✅ Only email is unique
   password: { type: String, required: true },
   role: { type: String, enum: ["admin", "user"], default: "user" },
   userImage: { type: String },
@@ -32,7 +32,7 @@ const UserSchema: Schema = new Schema({
   emergencyContactDetails: { type: String, default: "" },
 });
 
-// ✅ Ensure only email is unique
+// ✅ Ensure only email is unique by defining the index separately
 UserSchema.index({ email: 1 }, { unique: true });
 
 export const User = mongoose.model<IUser>("User", UserSchema);

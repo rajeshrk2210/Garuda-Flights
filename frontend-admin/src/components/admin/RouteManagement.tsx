@@ -162,8 +162,47 @@ const RouteManagement = () => {
         </button>
       </div>
 
-      {/* Route List */}
-      <h4 className="text-lg font-semibold mt-4">Route List</h4>
+      {/* 🔍 Search Section */}
+      <div className="mb-6 p-4 border rounded bg-gray-50">
+        <h4 className="text-lg font-semibold mb-2">🔍 Search Routes</h4>
+
+        <div className="flex space-x-2 mb-4">
+          <select
+            className="border p-2 flex-1"
+            value={searchStart}
+            onChange={(e) => setSearchStart(e.target.value)}
+          >
+            <option value="">All Locations</option> {/* ✅ Changed from "Select Start Location" */}
+            {LOCATIONS.map((city) => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+
+          <select
+            className="border p-2 flex-1"
+            value={searchEnd}
+            onChange={(e) => setSearchEnd(e.target.value)}
+          >
+            <option value="">All Locations</option> {/* ✅ Changed from "Select End Location" */}
+            {LOCATIONS.map((city) => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+
+          <button onClick={fetchRoutes} className="bg-blue-500 text-white px-4 py-2 rounded">
+            Search
+          </button>
+          <button
+            onClick={() => { setSearchStart(""); setSearchEnd(""); fetchRoutes(); }}
+            className="bg-gray-500 text-white px-4 py-2 rounded"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      {/* 📋 Route List */}
+      <h4 className="text-lg font-semibold mt-4">📋 Route List</h4>
       {isSearching ? (
         <p className="text-blue-500 mt-2">🔄 Searching...</p>
       ) : searchError ? (
