@@ -5,7 +5,10 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: "admin" | "user";
-  userImage?: string;
+  userImage?: {
+    data: Buffer;
+    contentType: string;
+  };
   dateOfBirth?: string;
   gender?: string;
   nationality?: string;
@@ -17,11 +20,14 @@ export interface IUser extends Document {
 }
 
 const UserSchema: Schema = new Schema({
-  userName: { type: String, required: true, trim: true }, // ❌ Removed `unique: true`
-  email: { type: String, required: true}, // ✅ Only email is unique
+  userName: { type: String, required: true, trim: true },
+  email: { type: String, required: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["admin", "user"], default: "user" },
-  userImage: { type: String },
+  userImage: {
+    data: Buffer,
+    contentType: String
+  },
   dateOfBirth: { type: String, default: "" },
   gender: { type: String, default: "" },
   nationality: { type: String, default: "" },
@@ -32,7 +38,6 @@ const UserSchema: Schema = new Schema({
   emergencyContactDetails: { type: String, default: "" },
 });
 
-// ✅ Ensure only email is unique by defining the index separately
 UserSchema.index({ email: 1 }, { unique: true });
 
 export const User = mongoose.model<IUser>("User", UserSchema);
