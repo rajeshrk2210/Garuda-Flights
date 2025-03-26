@@ -29,9 +29,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       mailingAddress,
       passportNumber,
       emergencyContactDetails,
+      role // ✅ capture the role from the body
     } = req.body;
-
-    let role: "admin" | "user" = req.headers["x-role"] === "admin" ? "admin" : "user";
 
     if (!email || !password || !userName) {
       res.status(400).json({ message: "Username, email, and password are required." });
@@ -41,7 +40,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const newUser = await registerUser(
       email,
       password,
-      role,
+      role || "user", // ✅ Use 'role' from request body or fallback to 'user'
       userName,
       userImage || "",
       dateOfBirth || "",
@@ -60,6 +59,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ message: error instanceof Error ? error.message : "An error occurred" });
   }
 };
+
 
 /** ✅ Login User & Generate Tokens */
 export const login = async (req: Request, res: Response): Promise<void> => {
