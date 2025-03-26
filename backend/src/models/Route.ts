@@ -1,23 +1,24 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-// ✅ Explicitly export `IRoute`
+// ✅ Interface
 export interface IRoute extends Document {
   startLocation: string;
   endLocation: string;
   distance: number;
-  duration: string;
+  duration: string; // e.g., "02:45"
 }
 
-const RouteSchema: Schema = new Schema(
+// ✅ Schema
+const RouteSchema: Schema<IRoute> = new Schema(
   {
-    startLocation: { type: String, required: true },
-    endLocation: { type: String, required: true },
+    startLocation: { type: String, required: true, trim: true },
+    endLocation: { type: String, required: true, trim: true },
     distance: { type: Number, required: true },
     duration: { type: String, required: true },
   },
   { timestamps: true }
 );
 
-// ✅ Keep `Route` as default export
+// ✅ Model
 const Route: Model<IRoute> = mongoose.model<IRoute>("Route", RouteSchema);
 export default Route;

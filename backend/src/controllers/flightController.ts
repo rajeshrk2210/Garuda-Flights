@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Flight, IFlight } from "../models/Flight";
 import Route, { IRoute } from "../models/Route";
+import Aircraft, { IAircraft } from "../models/Aircraft";
 import mongoose from "mongoose";
 
 /** ✅ Helper Function to Calculate Arrival Date & Time */
@@ -257,5 +258,55 @@ export const getFlightStats = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const searchFlights = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { start, end, date, class: flightClass } = req.query;
+
+    if (!start || !end || !date || !flightClass) {
+      res.status(400).json({ message: "Missing query parameters" });
+      return;
+    }
+
+    const flights = await Flight.find({
+      route: { $exists: true },
+      departureDate: date,
+      status: { $ne: "CANCELLED" },
+    })
+    .populate<{ route: IRoute }>("route"); // ✅ ONLY populate route
+
+    const filtered = flights
+      .filter((flight) => {
+        const route = flight.route;
+        return (
+          route &&
+          route.startLocation === start &&
+          route.endLocation === end
+        );
+      })
+      .map((flight) => {
+        const route = flight.route;
+
+        return {
+          _id: flight._id,
+          aircraftNumber: flight.aircraftNumber, // ✅ directly from flight
+          departureTime: flight.departureTime,
+          arrivalTime: flight.arrivalTime,
+          duration: route?.duration || "00:00",
+          price: flightClass === "Economy" ? flight.economyPrice : flight.premiumPrice,
+        };
+      });
+
+    res.status(200).json(filtered);
+  } catch (err) {
+    console.error("❌ Error searching flights:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+
+
 
 
