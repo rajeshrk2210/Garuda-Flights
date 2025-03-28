@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -19,9 +19,7 @@ const Flights = () => {
 
   // 🔐 Redirect to login if not authenticated
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
+    if (!user) navigate("/login");
   }, [user, navigate]);
 
   useEffect(() => {
@@ -42,9 +40,9 @@ const Flights = () => {
       alert("Please fill required fields");
       return;
     }
-  
+
     const token = localStorage.getItem("token");
-  
+
     try {
       const query = `start=${startLocation}&end=${endLocation}&date=${departureDate}&class=${flightClass}`;
       const res = await fetch(`http://localhost:5000/api/flights/search?${query}`, {
@@ -52,7 +50,7 @@ const Flights = () => {
       });
       const data = await res.json();
       setOutboundFlights(data);
-  
+
       if (tripType === "roundtrip" && returnDate) {
         const returnQuery = `start=${endLocation}&end=${startLocation}&date=${returnDate}&class=${flightClass}`;
         const returnRes = await fetch(`http://localhost:5000/api/flights/search?${returnQuery}`, {
@@ -67,9 +65,27 @@ const Flights = () => {
       console.error("Error searching flights:", err);
     }
   };
-  
 
-  if (!user) return null; // ⏳ Prevent flicker before redirect
+  const handleSelectFlight = (flight: any, type: "outbound" | "inbound") => {
+    const existing = JSON.parse(localStorage.getItem("selectedFlight") || "{}");
+
+    const updatedSelection = {
+      tripType,
+      passengers,
+      flightClass,
+      selectedOutbound: type === "outbound" ? flight : existing.selectedOutbound,
+      selectedInbound: type === "inbound" ? flight : existing.selectedInbound,
+    };
+
+    localStorage.setItem("selectedFlight", JSON.stringify(updatedSelection));
+
+    // 🛫 Redirect after outbound in oneway OR after inbound in roundtrip
+    if (tripType === "oneway" || (tripType === "roundtrip" && type === "inbound")) {
+      navigate("/review-flight");
+    }
+  };
+
+  if (!user) return null;
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -133,7 +149,12 @@ const Flights = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">₹{flight.price}</p>
-                  <button className="mt-2 px-4 py-2 bg-green-500 text-white rounded">Select</button>
+                  <button
+                    onClick={() => handleSelectFlight(flight, "outbound")}
+                    className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
+                  >
+                    Select
+                  </button>
                 </div>
               </div>
             ))}
@@ -156,7 +177,12 @@ const Flights = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">₹{flight.price}</p>
-                  <button className="mt-2 px-4 py-2 bg-green-500 text-white rounded">Select</button>
+                  <button
+                    onClick={() => handleSelectFlight(flight, "inbound")}
+                    className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
+                  >
+                    Select
+                  </button>
                 </div>
               </div>
             ))}

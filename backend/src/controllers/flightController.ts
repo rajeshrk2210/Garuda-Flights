@@ -272,8 +272,7 @@ export const searchFlights = async (req: Request, res: Response): Promise<void> 
       route: { $exists: true },
       departureDate: date,
       status: { $ne: "CANCELLED" },
-    })
-    .populate<{ route: IRoute }>("route"); // ✅ ONLY populate route
+    }).populate<{ route: IRoute }>("route"); // ✅ Only populate the route
 
     const filtered = flights
       .filter((flight) => {
@@ -289,11 +288,14 @@ export const searchFlights = async (req: Request, res: Response): Promise<void> 
 
         return {
           _id: flight._id,
-          aircraftNumber: flight.aircraftNumber, // ✅ directly from flight
+          aircraftNumber: flight.aircraftNumber, // ✅ Directly from Flight model
           departureTime: flight.departureTime,
           arrivalTime: flight.arrivalTime,
           duration: route?.duration || "00:00",
-          price: flightClass === "Economy" ? flight.economyPrice : flight.premiumPrice,
+          price:
+            flightClass === "Economy"
+              ? flight.economyPrice
+              : flight.premiumPrice,
         };
       });
 
@@ -303,6 +305,7 @@ export const searchFlights = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 
 
