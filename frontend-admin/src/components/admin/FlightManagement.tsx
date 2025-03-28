@@ -64,7 +64,7 @@ const calculateArrivalDetails = (departureDate: string, departureTime: string, r
   return {
 
 
-    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
+    arrivalDate: depDateTime.toLocaleDateString("en-CA"), // YYYY-MM-DD format
     arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
 
   };

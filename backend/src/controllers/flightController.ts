@@ -12,7 +12,7 @@ const calculateArrivalDetails = (departureDate: string, departureTime: string, d
   depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
 
   return {
-    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
+    arrivalDate: depDateTime.toLocaleDateString("en-CA"), // Format: YYYY-MM-DD
     arrivalTime: depDateTime.toTimeString().slice(0, 5),   // HH:MM format
   };
 };
@@ -198,7 +198,7 @@ export const updateFlight = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    flight.arrivalDate = depDateTime.toISOString().split("T")[0];
+    flight.arrivalDate = depDateTime.toLocaleDateString("en-CA");    ;
     flight.arrivalTime = depDateTime.toTimeString().slice(0, 5);
 
     await flight.save();

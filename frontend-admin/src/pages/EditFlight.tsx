@@ -25,7 +25,7 @@ const EditFlight = () => {
   }, [flightId]);
 
   const handleUpdate = async () => {
-    const originalDateTime = new Date(`${flight.departureDate}T${flight.departureTime}`);
+    const originalDateTime = new Date(`${flight.departureDate}T${flight.departureTime}:00`);
     const updatedDateTime = new Date(`${newDepartureDate}T${newDepartureTime}`);
 
     if (isNaN(updatedDateTime.getTime())) {
