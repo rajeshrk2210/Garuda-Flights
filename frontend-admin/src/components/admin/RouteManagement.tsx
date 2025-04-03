@@ -104,10 +104,10 @@ const RouteManagement = () => {
       <h3 className="text-xl font-semibold mb-4">🛤 Route Management</h3>
 
       {/* Add Route */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h4 className="text-lg font-semibold mb-2">➕ Add Route</h4>
+      <div className="bg-gray-100 border p-4 rounded mb-8">
+        <h4 className="text-lg font-semibold mb-4 text-gray-700">➕ Add Route</h4>
         <select
-          className="border p-2 w-full mb-2"
+          className="border p-2 w-full rounded mb-2 bg-white text-gray-800"
           value={newRoute.startLocation}
           onChange={(e) => setNewRoute({ ...newRoute, startLocation: e.target.value })}
         >
@@ -118,7 +118,7 @@ const RouteManagement = () => {
         </select>
 
         <select
-          className="border p-2 w-full mb-2"
+          className="border p-2 w-full rounded mb-2 bg-white text-gray-800"
           value={newRoute.endLocation}
           onChange={(e) => setNewRoute({ ...newRoute, endLocation: e.target.value })}
         >
@@ -131,15 +131,14 @@ const RouteManagement = () => {
         <input
           type="number"
           placeholder="Distance (km)"
-          className="border p-2 w-full mb-2"
+          className="border p-2 w-full rounded mb-2 bg-white placeholder-gray-500 text-gray-800"
           value={newRoute.distance || ""}
           onChange={(e) => setNewRoute({ ...newRoute, distance: Number(e.target.value) })}
         />
 
-        {/* Digital Timer for Duration */}
         <div className="flex space-x-2 mb-2">
           <select
-            className="border p-2 flex-1"
+            className="border p-2 flex-1 rounded bg-white text-gray-800"
             onChange={(e) => handleDurationChange(e.target.value, newRoute.duration.split(":")[1])}
           >
             {[...Array(24).keys()].map((h) => (
@@ -148,7 +147,7 @@ const RouteManagement = () => {
           </select>
 
           <select
-            className="border p-2 flex-1"
+            className="border p-2 flex-1 rounded bg-white text-gray-800"
             onChange={(e) => handleDurationChange(newRoute.duration.split(":")[0], e.target.value)}
           >
             {[0, 15, 30, 45].map((m) => (
@@ -157,80 +156,84 @@ const RouteManagement = () => {
           </select>
         </div>
 
-        <button onClick={addRoute} className="bg-blue-500 text-white px-4 py-2 rounded">
+        <button onClick={addRoute} className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">
           Add Route
         </button>
       </div>
 
       {/* 🔍 Search Section */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h4 className="text-lg font-semibold mb-2">🔍 Search Routes</h4>
-
-        <div className="flex space-x-2 mb-4">
+      <div className="bg-gray-100 border p-4 rounded mb-8">
+        <h4 className="text-lg font-semibold mb-4 text-gray-700">🔍 Search Routes</h4>
+        <div className="flex flex-col md:flex-row gap-4">
           <select
-            className="border p-2 flex-1"
+            className="border p-2 flex-1 rounded bg-white text-gray-800"
             value={searchStart}
             onChange={(e) => setSearchStart(e.target.value)}
           >
-            <option value="">All Locations</option> {/* ✅ Changed from "Select Start Location" */}
+            <option value="">All Start Locations</option>
             {LOCATIONS.map((city) => (
               <option key={city} value={city}>{city}</option>
             ))}
           </select>
 
           <select
-            className="border p-2 flex-1"
+            className="border p-2 flex-1 rounded bg-white text-gray-800"
             value={searchEnd}
             onChange={(e) => setSearchEnd(e.target.value)}
           >
-            <option value="">All Locations</option> {/* ✅ Changed from "Select End Location" */}
+            <option value="">All End Locations</option>
             {LOCATIONS.map((city) => (
               <option key={city} value={city}>{city}</option>
             ))}
           </select>
 
-          <button onClick={fetchRoutes} className="bg-blue-500 text-white px-4 py-2 rounded">
+          <button onClick={fetchRoutes} className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
             Search
           </button>
           <button
             onClick={() => { setSearchStart(""); setSearchEnd(""); fetchRoutes(); }}
-            className="bg-gray-500 text-white px-4 py-2 rounded"
+            className="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600"
           >
             Clear
           </button>
         </div>
       </div>
 
+
       {/* 📋 Route List */}
-      <h4 className="text-lg font-semibold mt-4">📋 Route List</h4>
-      {isSearching ? (
-        <p className="text-blue-500 mt-2">🔄 Searching...</p>
-      ) : searchError ? (
-        <p className="text-red-500 mt-2">{searchError}</p>
-      ) : routes.length === 0 ? (
-        <p className="text-gray-600 mt-2">No routes found.</p>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300 mt-2">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">Start Location</th>
-              <th className="border p-2">End Location</th>
-              <th className="border p-2">Distance (km)</th>
-              <th className="border p-2">Duration</th>
-            </tr>
-          </thead>
-          <tbody>
-            {routes.map((route: Route, index) => (
-              <tr key={index} className="border">
-                <td className="border p-2">{route.startLocation}</td>
-                <td className="border p-2">{route.endLocation}</td>
-                <td className="border p-2">{route.distance}</td>
-                <td className="border p-2">{route.duration}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div>
+        <h4 className="text-lg font-semibold mb-3 text-gray-700">📋 Route List</h4>
+        {isSearching ? (
+          <p className="text-blue-500">🔄 Searching...</p>
+        ) : searchError ? (
+          <p className="text-red-500">{searchError}</p>
+        ) : routes.length === 0 ? (
+          <p className="text-gray-600">No routes found.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border border-gray-300">
+              <thead className="bg-blue-100 text-blue-700">
+                <tr>
+                  <th className="p-3 border">Start Location</th>
+                  <th className="p-3 border">End Location</th>
+                  <th className="p-3 border">Distance (km)</th>
+                  <th className="p-3 border">Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {routes.map((route: Route, index) => (
+                  <tr key={index} className="hover:bg-gray-100 text-gray-800">
+                    <td className="p-3 border">{route.startLocation}</td>
+                    <td className="p-3 border">{route.endLocation}</td>
+                    <td className="p-3 border">{route.distance}</td>
+                    <td className="p-3 border">{route.duration}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
