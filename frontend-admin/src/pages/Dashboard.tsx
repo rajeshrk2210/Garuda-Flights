@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import {
   FaPlane,
@@ -103,7 +104,7 @@ const Dashboard = () => {
 export default Dashboard;
 
 // 🔹 Reusable Card Component
-const DashboardCard = ({ icon, label, value, color }: { icon: JSX.Element; label: string; value: number; color: string }) => (
+const DashboardCard = ({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: number; color: string }) => (
   <div className={`p-5 text-white rounded-lg shadow-md flex items-center gap-4 ${color}`}>
     <div className="text-3xl">{icon}</div>
     <div>
@@ -112,6 +113,7 @@ const DashboardCard = ({ icon, label, value, color }: { icon: JSX.Element; label
     </div>
   </div>
 );
+
 
 // 🔹 Reusable Section Wrapper
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
