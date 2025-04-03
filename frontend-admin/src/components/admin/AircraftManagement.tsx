@@ -135,19 +135,19 @@ const AircraftManagement = () => {
         </button>
       </div>
 
-      {/* Search Aircraft */}
-      <div className="bg-gray-50 border p-4 rounded mb-8">
-        <h4 className="text-lg font-semibold mb-4 text-gray-700">🔍 Search Aircrafts</h4>
+      {/* Search Aircrafts */}
+      <div className="bg-white border p-4 rounded shadow mb-8">
+        <h4 className="text-lg font-semibold mb-4 text-blue-700">🔍 Search Aircrafts</h4>
         <div className="flex flex-col md:flex-row gap-4">
           <input
             type="text"
             placeholder="Search by Aircraft Number"
-            className="border p-2 rounded flex-1"
+            className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded flex-1"
             value={searchAircraftNumber}
             onChange={(e) => setSearchAircraftNumber(e.target.value)}
           />
           <select
-            className="border p-2 rounded flex-1"
+            className="border border-gray-300 bg-white text-gray-800 p-2 rounded flex-1"
             value={searchAircraftModel}
             onChange={(e) => setSearchAircraftModel(e.target.value)}
           >
@@ -162,15 +162,16 @@ const AircraftManagement = () => {
         </div>
       </div>
 
+
       {/* Aircraft List */}
-      <div>
-        <h4 className="text-lg font-semibold mb-3 text-gray-700">📋 Aircraft List</h4>
+      <div className="bg-white border p-4 rounded shadow">
+        <h4 className="text-lg font-semibold mb-3 text-blue-700">📋 Aircraft List</h4>
         {isSearching ? (
           <p className="text-blue-500">🔄 Searching...</p>
         ) : searchError ? (
           <p className="text-red-500">{searchError}</p>
         ) : aircrafts.length === 0 ? (
-          <p className="text-gray-500">No aircrafts found.</p>
+          <p className="text-gray-600">No aircrafts found.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border border-gray-300">
