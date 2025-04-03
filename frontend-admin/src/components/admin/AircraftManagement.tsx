@@ -94,42 +94,43 @@ const AircraftManagement = () => {
       <h3 className="text-2xl font-bold text-blue-700 mb-6">✈️ Aircraft Management</h3>
 
       {/* Add Aircraft */}
-      <div className="bg-gray-50 border p-4 rounded mb-8">
-        <h4 className="text-lg font-semibold mb-4 text-gray-700">➕ Add New Aircraft</h4>
-        <div className="grid md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Aircraft Number"
-            className="border p-2 rounded"
-            value={newAircraft.aircraftNumber}
-            onChange={(e) => setNewAircraft({ ...newAircraft, aircraftNumber: e.target.value })}
-          />
-          <select
-            className="border p-2 rounded"
-            value={newAircraft.aircraftModel}
-            onChange={(e) => setNewAircraft({ ...newAircraft, aircraftModel: e.target.value })}
-          >
-            <option value="">Select Model</option>
-            {aircraftModels.map((model, index) => (
-              <option key={index} value={model}>{model}</option>
-            ))}
-          </select>
-          <input
-            type="number"
-            placeholder="Economy Seats"
-            className="border p-2 rounded"
-            value={newAircraft.economySeats || ""}
-            onChange={(e) => setNewAircraft({ ...newAircraft, economySeats: Number(e.target.value) })}
-          />
-          <input
-            type="number"
-            placeholder="Premium Seats"
-            className="border p-2 rounded"
-            value={newAircraft.premiumSeats || ""}
-            onChange={(e) => setNewAircraft({ ...newAircraft, premiumSeats: Number(e.target.value) })}
-          />
-        </div>
-        <button onClick={addAircraft} className="mt-4 bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">
+      <div className="mb-6 p-4 border rounded bg-white shadow">
+        <h4 className="text-lg font-semibold mb-4 text-blue-700">➕ Add Aircraft</h4>
+
+        <input
+          type="text"
+          placeholder="Aircraft Number"
+          className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded w-full mb-3"
+          value={newAircraft.aircraftNumber}
+          onChange={(e) => setNewAircraft({ ...newAircraft, aircraftNumber: e.target.value })}
+        />
+
+        <select
+          className="border border-gray-300 bg-white text-gray-800 p-2 rounded w-full mb-3"
+          value={newAircraft.aircraftModel}
+          onChange={(e) => setNewAircraft({ ...newAircraft, aircraftModel: e.target.value })}
+        >
+          <option value="">Select Model</option>
+          {aircraftModels.map((model, index) => <option key={index} value={model}>{model}</option>)}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Economy Seats"
+          className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded w-full mb-3"
+          value={newAircraft.economySeats || ""}
+          onChange={(e) => setNewAircraft({ ...newAircraft, economySeats: Number(e.target.value) })}
+        />
+
+        <input
+          type="number"
+          placeholder="Premium Seats"
+          className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded w-full mb-4"
+          value={newAircraft.premiumSeats || ""}
+          onChange={(e) => setNewAircraft({ ...newAircraft, premiumSeats: Number(e.target.value) })}
+        />
+
+        <button onClick={addAircraft} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
           Add Aircraft
         </button>
       </div>
