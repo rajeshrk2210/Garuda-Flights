@@ -174,8 +174,8 @@ const AircraftManagement = () => {
           <p className="text-gray-600">No aircrafts found.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border border-gray-300">
-              <thead className="bg-blue-100 text-blue-700">
+            <table className="w-full text-left border border-gray-300 text-gray-900">
+              <thead className="bg-blue-600 text-white">
                 <tr>
                   <th className="p-3 border">Aircraft Number</th>
                   <th className="p-3 border">Model</th>
@@ -185,8 +185,8 @@ const AircraftManagement = () => {
               </thead>
               <tbody>
                 {aircrafts.map((aircraft: Aircraft, index) => (
-                  <tr key={index} className="hover:bg-gray-100">
-                    <td className="p-3 border">{aircraft.aircraftNumber}</td>
+                  <tr key={index} className="hover:bg-blue-50">
+                    <td className="p-3 border font-medium">{aircraft.aircraftNumber}</td>
                     <td className="p-3 border">{aircraft.aircraftModel}</td>
                     <td className="p-3 border">{aircraft.economySeats}</td>
                     <td className="p-3 border">{aircraft.premiumSeats}</td>
