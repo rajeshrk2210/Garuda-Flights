@@ -48,32 +48,24 @@ const formatTime = (timeStr: string): string => {
 };
 
 /** 🔹 Calculate Arrival Date & Time */
-
 const calculateArrivalDetails = (departureDate: string, departureTime: string, routeDuration: string) => {
   if (!departureDate || !departureTime || !routeDuration) return { arrivalDate: "", arrivalTime: "" };
-
 
   const [year, month, day] = departureDate.split("-").map(Number);
   const [depHours, depMinutes] = departureTime.split(":").map(Number);
   const [durationHours, durationMinutes] = routeDuration.split(":").map(Number);
 
-
   const depDateTime = new Date(year, month - 1, day, depHours, depMinutes);
 
-
-
-
-  depDateTime.setHours(depDateTime.getHours() + durationHours);
-  depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
+  const durationInMs = (durationHours * 60 + durationMinutes) * 60 * 1000;
+  const arrivalDateTime = new Date(depDateTime.getTime() + durationInMs);
 
   return {
-
-
-    arrivalDate: depDateTime.toLocaleDateString("en-CA"), // YYYY-MM-DD format
-    arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
-
+    arrivalDate: arrivalDateTime.toISOString().split("T")[0], // ✅ Safer and consistent YYYY-MM-DD
+    arrivalTime: arrivalDateTime.toTimeString().slice(0, 5),   // HH:MM format
   };
 };
+
 
 const FlightManagement = () => {
   // Inside FlightManagement component
