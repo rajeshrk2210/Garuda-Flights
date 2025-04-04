@@ -14,15 +14,17 @@ const Login = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
+  
     const data = await res.json();
     if (res.ok) {
+      localStorage.removeItem("selectedFlight"); // ✅ Clear selected flight on login
       login(data.user, data.accessToken);
       navigate("/profile");
     } else {
       alert(data.message);
     }
   };
+  
 
   return (
     <div className="p-6 max-w-md mx-auto">

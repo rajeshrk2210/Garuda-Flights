@@ -36,6 +36,7 @@ const Flights = () => {
   }, []);
 
   const searchFlights = async () => {
+    localStorage.removeItem("selectedFlight");
     if (!startLocation || !endLocation || !departureDate) {
       alert("Please fill required fields");
       return;
@@ -66,24 +67,55 @@ const Flights = () => {
     }
   };
 
+  // ⏱️ Utility to calculate arrival from departureDate + time + duration
+  const calculateArrival = (departureDate: string, departureTime: string, duration: string) => {
+    const [year, month, day] = departureDate.split("-").map(Number);
+    const [depH, depM] = departureTime.split(":").map(Number);
+    const [durH, durM] = duration.split(":").map(Number);
+
+    const depDateTime = new Date(year, month - 1, day, depH, depM);
+    depDateTime.setHours(depDateTime.getHours() + durH);
+    depDateTime.setMinutes(depDateTime.getMinutes() + durM);
+
+    return {
+      arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD
+      arrivalTime: depDateTime.toTimeString().slice(0, 5),   // HH:MM
+    };
+  };
+
+
   const handleSelectFlight = (flight: any, type: "outbound" | "inbound") => {
     const existing = JSON.parse(localStorage.getItem("selectedFlight") || "{}");
+
+    const depDate = type === "outbound" ? departureDate : returnDate;
+    const { arrivalDate, arrivalTime } = calculateArrival(depDate, flight.departureTime, flight.duration);
 
     const updatedSelection = {
       tripType,
       passengers,
       flightClass,
-      selectedOutbound: type === "outbound" ? flight : existing.selectedOutbound,
-      selectedInbound: type === "inbound" ? flight : existing.selectedInbound,
+      selectedOutbound: type === "outbound" ? {
+        ...flight,
+        departureDate: depDate,
+        arrivalDate,
+        arrivalTime,
+      } : existing.selectedOutbound,
+      selectedInbound: type === "inbound" ? {
+        ...flight,
+        departureDate: depDate,
+        arrivalDate,
+        arrivalTime,
+      } : existing.selectedInbound,
     };
 
     localStorage.setItem("selectedFlight", JSON.stringify(updatedSelection));
 
-    // 🛫 Redirect after outbound in oneway OR after inbound in roundtrip
     if (tripType === "oneway" || (tripType === "roundtrip" && type === "inbound")) {
       navigate("/review-flight");
     }
   };
+
+
 
   if (!user) return null;
 

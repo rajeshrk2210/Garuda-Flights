@@ -206,11 +206,11 @@ const FlightManagement = () => {
   return (
     <div className="bg-white p-6 rounded shadow-lg mb-8">
       <h3 className="text-2xl font-bold mb-6 text-blue-700">✈️ Flight Management</h3>
-  
+
       {/* Add Flight Section */}
       <div className="mb-6 p-4 border rounded bg-gray-100">
         <h4 className="text-lg font-semibold mb-4 text-gray-700">➕ Add Flight</h4>
-  
+
         <label className="block mb-1 text-sm text-gray-700">Aircraft</label>
         <select name="aircraftNumber" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.aircraftNumber} onChange={handleInputChange}>
           <option value="">Select Aircraft</option>
@@ -218,7 +218,7 @@ const FlightManagement = () => {
             <option key={aircraft.aircraftNumber} value={aircraft.aircraftNumber}>{aircraft.aircraftNumber}</option>
           ))}
         </select>
-  
+
         <label className="block mb-1 text-sm text-gray-700">Route</label>
         <select name="routeId" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.routeId} onChange={handleInputChange}>
           <option value="">Select Route</option>
@@ -226,28 +226,28 @@ const FlightManagement = () => {
             <option key={route._id} value={route._id}>{route.startLocation} → {route.endLocation}</option>
           ))}
         </select>
-  
+
         <label className="block mb-1 text-sm text-gray-700">Departure Date</label>
         <input type="date" name="departureDate" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.departureDate} onChange={handleInputChange} />
-  
+
         <label className="block mb-1 text-sm text-gray-700">Departure Time</label>
         <input type="time" name="departureTime" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.departureTime} onChange={handleInputChange} />
-  
+
         <label className="block mb-1 text-sm text-gray-700">Economy Price</label>
         <input type="text" name="economyPrice" placeholder="e.g. 100" className="border p-2 w-full rounded mb-3 bg-white placeholder-gray-500 text-gray-800" value={newFlight.economyPrice} onChange={handleInputChange} />
-  
+
         <label className="block mb-1 text-sm text-gray-700">Premium Price</label>
         <input type="text" name="premiumPrice" placeholder="e.g. 200" className="border p-2 w-full rounded mb-4 bg-white placeholder-gray-500 text-gray-800" value={newFlight.premiumPrice} onChange={handleInputChange} />
-  
+
         <button onClick={addFlight} className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition">
           Add Flight
         </button>
       </div>
-  
+
       {/* Search Flights Section */}
       <div className="mb-6 p-4 border rounded bg-gray-100">
         <h4 className="text-lg font-semibold mb-4 text-gray-700">🔍 Search Flights</h4>
-  
+
         <input
           type="text"
           placeholder="Aircraft Number"
@@ -255,7 +255,7 @@ const FlightManagement = () => {
           value={searchParams.aircraftNumber}
           onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })}
         />
-  
+
         <select
           className="border p-2 w-full rounded mb-3 bg-white text-gray-800"
           value={searchParams.startLocation}
@@ -266,7 +266,7 @@ const FlightManagement = () => {
             <option key={route._id} value={route.startLocation}>{route.startLocation}</option>
           ))}
         </select>
-  
+
         <select
           className="border p-2 w-full rounded mb-3 bg-white text-gray-800"
           value={searchParams.endLocation}
@@ -277,7 +277,7 @@ const FlightManagement = () => {
             <option key={route._id} value={route.endLocation}>{route.endLocation}</option>
           ))}
         </select>
-  
+
         <select
           className="border p-2 w-full rounded mb-4 bg-white text-gray-800"
           value={searchParams.type}
@@ -287,16 +287,16 @@ const FlightManagement = () => {
           <option value="Upcoming">Upcoming Flights</option>
           <option value="Previous">Previous Flights</option>
         </select>
-  
+
         <button onClick={fetchFlights} className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">
           Search Flights
         </button>
       </div>
-  
+
       {/* Display Flights */}
       <div className="mb-6 p-4 border rounded bg-gray-100">
         <h4 className="text-lg font-semibold mb-4 text-gray-700">🛫 Flight Results</h4>
-  
+
         {flights.length === 0 ? (
           <p className="text-gray-600">No flights found.</p>
         ) : (
@@ -347,7 +347,7 @@ const FlightManagement = () => {
       </div>
     </div>
   );
-  
+
 };
 
 export default FlightManagement;
