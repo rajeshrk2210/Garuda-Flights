@@ -26,13 +26,18 @@ interface Flight {
   status: string;
 }
 
-
-
-/** 🔹 Convert Date to Readable Format */
+/** 🔹 Convert YYYY-MM-DD to readable format without time zone issues */
 const formatDate = (dateStr: string): string => {
-  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
-  return new Date(dateStr).toLocaleDateString("en-US", options);
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day)); // UTC-safe
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC", // Ensure no local time zone affects it
+  });
 };
+
 
 /** 🔹 Convert Time to 12-hour Format */
 const formatTime = (timeStr: string): string => {
