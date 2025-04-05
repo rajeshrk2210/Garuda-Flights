@@ -9,6 +9,7 @@ import Navbar from "./components/common/Navbar";
 import PassengerInfo from "./pages/PassengerInfo";
 import ReviewBooking from "./pages/ReviewBooking";
 import Payment from "./pages/Payment";
+import Confirmation from "./pages/Confirmation";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/passenger" element={<PassengerInfo />} />
         <Route path="/review-booking" element={<ReviewBooking />} />
         <Route path="/payment" element={<Payment />} />
+        <Route path="/confirmation" element={<Confirmation />} />
       </Routes>
     </Router>
   );
