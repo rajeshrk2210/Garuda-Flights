@@ -4,11 +4,17 @@ import { useNavigate } from "react-router-dom";
 // 📆 Format ISO date safely
 const formatDate = (isoDate: string) => {
   if (!isoDate) return "N/A";
-  const date = new Date(isoDate + "T00:00:00"); // Ensure no timezone offset
+  const parts = isoDate.split("-");
+  if (parts.length !== 3) return "N/A";
+  const [year, month, day] = parts.map(Number);
+  const date = new Date(year, month - 1, day);
   return date.toLocaleDateString("en-US", {
-    year: "numeric", month: "short", day: "numeric"
+    year: "numeric",
+    month: "short",
+    day: "numeric"
   });
 };
+
 
 
 const ReviewFlight = () => {
@@ -38,6 +44,8 @@ const ReviewFlight = () => {
       {selectedOutbound && (
         <div className="mb-6 p-4 border rounded bg-gray-100">
           <h3 className="text-lg font-semibold mb-2">🛫 Outbound Flight</h3>
+          <p><strong>From:</strong> {selectedFlights.from}</p>
+          <p><strong>To:</strong> {selectedFlights.to}</p>
           <p><strong>Aircraft No:</strong> {selectedOutbound.aircraftNumber}</p>
           <p><strong>Departure Date:</strong> {formatDate(selectedOutbound.departureDate)}</p>
           <p><strong>Departure Time:</strong> {selectedOutbound.departureTime}</p>
@@ -51,6 +59,8 @@ const ReviewFlight = () => {
       {tripType === "roundtrip" && selectedInbound && (
         <div className="mb-6 p-4 border rounded bg-gray-100">
           <h3 className="text-lg font-semibold mb-2">🛬 Inbound Flight</h3>
+          <p><strong>From:</strong> {selectedFlights.from}</p>
+          <p><strong>To:</strong> {selectedFlights.to}</p>
           <p><strong>Aircraft No:</strong> {selectedInbound.aircraftNumber}</p>
           <p><strong>Departure Date:</strong> {formatDate(selectedInbound.departureDate)}</p>
           <p><strong>Departure Time:</strong> {selectedInbound.departureTime}</p>

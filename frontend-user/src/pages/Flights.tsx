@@ -86,34 +86,42 @@ const Flights = () => {
 
   const handleSelectFlight = (flight: any, type: "outbound" | "inbound") => {
     const existing = JSON.parse(localStorage.getItem("selectedFlight") || "{}");
-
-    const depDate = type === "outbound" ? departureDate : returnDate;
-    const { arrivalDate, arrivalTime } = calculateArrival(depDate, flight.departureTime, flight.duration);
-
+  
+    // ✅ Use the state variables based on type
+    const selectedDate = type === "outbound" ? departureDate : returnDate;
+  
+    const { arrivalDate, arrivalTime } = calculateArrival(
+      selectedDate,
+      flight.departureTime,
+      flight.duration
+    );
+  
+    const updatedFlight = {
+      ...flight,
+      departureDate: selectedDate,
+      arrivalDate,
+      arrivalTime,
+    };
+  
     const updatedSelection = {
       tripType,
       passengers,
       flightClass,
-      selectedOutbound: type === "outbound" ? {
-        ...flight,
-        departureDate: depDate,
-        arrivalDate,
-        arrivalTime,
-      } : existing.selectedOutbound,
-      selectedInbound: type === "inbound" ? {
-        ...flight,
-        departureDate: depDate,
-        arrivalDate,
-        arrivalTime,
-      } : existing.selectedInbound,
+      from: startLocation,
+      to: endLocation,
+      selectedOutbound: type === "outbound" ? updatedFlight : existing.selectedOutbound,
+      selectedInbound: type === "inbound" ? updatedFlight : existing.selectedInbound,
     };
-
+  
     localStorage.setItem("selectedFlight", JSON.stringify(updatedSelection));
-
+  
     if (tripType === "oneway" || (tripType === "roundtrip" && type === "inbound")) {
       navigate("/review-flight");
     }
   };
+  
+  
+  
 
 
 
