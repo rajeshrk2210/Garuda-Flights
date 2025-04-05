@@ -6,6 +6,7 @@ import Profile from "./pages/Profile";
 import Flights from "./pages/Flights";
 import ReviewFlight from "./pages/ReviewFlight"; // ✅ Make sure this import exists
 import Navbar from "./components/common/Navbar";
+import PassengerInfo from "./pages/PassengerInfo";
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/flights" element={<Flights />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/review-flight" element={<ReviewFlight />} />        
+        <Route path="/review-flight" element={<ReviewFlight />} />
+        <Route path="/passenger" element={<PassengerInfo />} />     
       </Routes>
     </Router>
   );
