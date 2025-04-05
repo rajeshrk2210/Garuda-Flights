@@ -8,7 +8,7 @@ import ReviewFlight from "./pages/ReviewFlight"; // ✅ Make sure this import ex
 import Navbar from "./components/common/Navbar";
 import PassengerInfo from "./pages/PassengerInfo";
 import ReviewBooking from "./pages/ReviewBooking";
-// import Payment from "./pages/Payment";
+import Payment from "./pages/Payment";
 
 function App() {
   return (
@@ -23,7 +23,7 @@ function App() {
         <Route path="/review-flight" element={<ReviewFlight />} />
         <Route path="/passenger" element={<PassengerInfo />} />
         <Route path="/review-booking" element={<ReviewBooking />} />
-        {/* <Route path="/payment" element={<Payment />} /> */}
+        <Route path="/payment" element={<Payment />} />
       </Routes>
     </Router>
   );

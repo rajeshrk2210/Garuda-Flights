@@ -53,7 +53,7 @@ const Payment = () => {
         type="text"
         placeholder="Card Number (16 digits)"
         value={cardNumber}
-        onChange={(e) => setCardNumber(e.target.value)}
+        onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ""))}
         className="border p-2 rounded w-full mb-3"
         maxLength={16}
       />
