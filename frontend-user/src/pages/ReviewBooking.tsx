@@ -19,13 +19,18 @@ const ReviewBooking = () => {
     setPassengerData(JSON.parse(passengerData));
   }, [navigate]);
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("en-US", {
+  const formatDate = (isoDate: string) => {
+    if (!isoDate) return "N/A";
+    const [year, month, day] = isoDate.split("-").map(Number);
+    const date = new Date(year, month - 1, day); // Local time
+    return date.toLocaleDateString("en-US", {
       weekday: "short",
       month: "short",
       day: "numeric",
-      year: "numeric",
+      year: "numeric"
     });
+  };
+  
 
   if (!booking || !passengerData) {
     return <p className="text-center mt-10 text-gray-600">Loading booking details...</p>;

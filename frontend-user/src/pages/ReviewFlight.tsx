@@ -4,16 +4,16 @@ import { useNavigate } from "react-router-dom";
 // 📆 Format ISO date safely
 const formatDate = (isoDate: string) => {
   if (!isoDate) return "N/A";
-  const parts = isoDate.split("-");
-  if (parts.length !== 3) return "N/A";
-  const [year, month, day] = parts.map(Number);
-  const date = new Date(year, month - 1, day);
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const date = new Date(year, month - 1, day); // Local time
   return date.toLocaleDateString("en-US", {
-    year: "numeric",
+    weekday: "short",
     month: "short",
-    day: "numeric"
+    day: "numeric",
+    year: "numeric"
   });
 };
+
 
 
 
