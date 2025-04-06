@@ -18,10 +18,7 @@ export interface IFlight extends Document {
 
 const FlightSchema: Schema = new Schema({
   route: { type: Schema.Types.ObjectId, ref: "Route", required: true },
-  aircraftNumber: { type: String, required: true }, // ✅ Add this
-  // Remove or comment this line if not using aircraft model
-  // aircraft: { type: Schema.Types.ObjectId, ref: "Aircraft", required: true },
-
+  aircraftNumber: { type: String, required: true },
   departureDate: { type: String, required: true },
   departureTime: { type: String, required: true },
   arrivalDate: { type: String, required: true },
@@ -29,7 +26,17 @@ const FlightSchema: Schema = new Schema({
   economyPrice: { type: Number, required: true },
   premiumPrice: { type: Number, required: true },
   status: { type: String, enum: ["OK", "CANCELLED", "DELAYED"], default: "OK" },
+
+  availableSeats: {
+    economy: { type: [Number], default: [] },
+    premium: { type: [Number], default: [] },
+  },
+  bookedSeats: {
+    economy: { type: [Number], default: [] }, // E.g., ['E1', 'E2']
+    premium: { type: [Number], default: [] },
+  },
 });
+
 
 
 export const Flight = mongoose.model<IFlight>("Flight", FlightSchema);

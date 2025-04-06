@@ -99,6 +99,12 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    const aircraft = await Aircraft.findOne({ aircraftNumber });
+    if (!aircraft) {
+      res.status(404).json({ message: "Aircraft not found." });
+      return;
+    }
+
     const { arrivalDate, arrivalTime } = calculateArrivalDetails(departureDate, departureTime, route.duration);
 
     const newFlight = new Flight({
@@ -111,6 +117,14 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
       economyPrice,
       premiumPrice,
       status: "OK",
+      bookedSeats: {
+        economy: [],
+        premium: [],
+      },
+      availableSeats: {
+        economy: Array.from({ length: aircraft.economySeats }, (_, i) => i + 1),
+        premium: Array.from({ length: aircraft.premiumSeats }, (_, i) => i + 1),
+      },
     });
 
     await newFlight.save();
@@ -122,6 +136,7 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const getFlightById = async (req: Request, res: Response): Promise<void> => {
   try {
