@@ -20,7 +20,7 @@ const App = () => {
     <Router>
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
-        <main className={`flex-grow ${admin ? "ml-64" : ""}`}>
+        <main className={`flex-grow ${admin ? "ml-72" : ""}`}>
           <Routes>
             {/* Root path: redirect to /dashboard if logged in, /login if not */}
             <Route

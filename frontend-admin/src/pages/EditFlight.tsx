@@ -93,7 +93,7 @@ const EditFlight = () => {
   const isEditable = isUpcoming && flight.status !== "CANCELLED";
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 max-w-xl mx-auto">
+    <div className="bg-white mt-10 rounded-xl shadow-sm p-6 border border-gray-200 max-w-xl mx-auto">
       <h2 className="text-2xl font-semibold text-teal-700 mb-6 text-center">✏️ Edit Flight</h2>
 
       {/* Flight Info */}
