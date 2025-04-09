@@ -33,11 +33,10 @@ const AircraftManagement = () => {
     fetchAircrafts();
   }, []);
 
-  /** 🔹 Fetch Aircrafts with Optional Search Filters */
   const fetchAircrafts = async () => {
     setIsSearching(true);
     setSearchError(null);
-    setAircrafts([]); // Clear previous results before new search
+    setAircrafts([]);
 
     try {
       const queryParams = new URLSearchParams();
@@ -45,10 +44,7 @@ const AircraftManagement = () => {
       if (searchAircraftModel) queryParams.append("aircraftModel", searchAircraftModel);
 
       const response = await fetch(`http://localhost:5000/api/aircrafts?${queryParams.toString()}`);
-
-      if (!response.ok) {
-        throw new Error(`❌ API Error: ${response.statusText}`);
-      }
+      if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
 
       const data = await response.json();
 
@@ -65,8 +61,6 @@ const AircraftManagement = () => {
     }
   };
 
-
-  /** 🔹 Add Aircraft */
   const addAircraft = async () => {
     if (!newAircraft.aircraftNumber || !newAircraft.aircraftModel || !newAircraft.economySeats || !newAircraft.premiumSeats) {
       alert("⚠️ All fields are required!");
@@ -85,7 +79,7 @@ const AircraftManagement = () => {
       if (response.ok) {
         alert("✅ Aircraft added successfully!");
         setNewAircraft({ aircraftNumber: "", aircraftModel: "", economySeats: 0, premiumSeats: 0 });
-        fetchAircrafts(); // Refresh aircraft list
+        fetchAircrafts();
       } else {
         alert(`❌ Error: ${data.message}`);
       }
@@ -96,59 +90,64 @@ const AircraftManagement = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow-lg mb-8">
-      <h3 className="text-xl font-semibold mb-4">✈️ Aircraft Management</h3>
+    <div className="bg-white p-6 rounded-lg shadow-md mb-10">
+      <h3 className="text-2xl font-bold text-blue-700 mb-6">✈️ Aircraft Management</h3>
 
       {/* Add Aircraft */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h4 className="text-lg font-semibold mb-2">➕ Add Aircraft</h4>
+      <div className="mb-6 p-4 border rounded bg-white shadow">
+        <h4 className="text-lg font-semibold mb-4 text-blue-700">➕ Add Aircraft</h4>
+
         <input
           type="text"
           placeholder="Aircraft Number"
-          className="border p-2 w-full mb-2"
+          className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded w-full mb-3"
           value={newAircraft.aircraftNumber}
           onChange={(e) => setNewAircraft({ ...newAircraft, aircraftNumber: e.target.value })}
         />
+
         <select
-          className="border p-2 w-full mb-2"
+          className="border border-gray-300 bg-white text-gray-800 p-2 rounded w-full mb-3"
           value={newAircraft.aircraftModel}
           onChange={(e) => setNewAircraft({ ...newAircraft, aircraftModel: e.target.value })}
         >
           <option value="">Select Model</option>
           {aircraftModels.map((model, index) => <option key={index} value={model}>{model}</option>)}
         </select>
+
         <input
           type="number"
           placeholder="Economy Seats"
-          className="border p-2 w-full mb-2"
+          className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded w-full mb-3"
           value={newAircraft.economySeats || ""}
           onChange={(e) => setNewAircraft({ ...newAircraft, economySeats: Number(e.target.value) })}
         />
+
         <input
           type="number"
           placeholder="Premium Seats"
-          className="border p-2 w-full mb-2"
+          className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded w-full mb-4"
           value={newAircraft.premiumSeats || ""}
           onChange={(e) => setNewAircraft({ ...newAircraft, premiumSeats: Number(e.target.value) })}
         />
-        <button onClick={addAircraft} className="bg-blue-500 text-white px-4 py-2 rounded">
+
+        <button onClick={addAircraft} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
           Add Aircraft
         </button>
       </div>
 
       {/* Search Aircrafts */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h4 className="text-lg font-semibold mb-2">🔍 Search Aircrafts</h4>
-        <div className="flex space-x-4 mb-4">
+      <div className="bg-white border p-4 rounded shadow mb-8">
+        <h4 className="text-lg font-semibold mb-4 text-blue-700">🔍 Search Aircrafts</h4>
+        <div className="flex flex-col md:flex-row gap-4">
           <input
             type="text"
             placeholder="Search by Aircraft Number"
-            className="border p-2 flex-1"
+            className="border border-gray-300 bg-white text-gray-800 placeholder-gray-600 p-2 rounded flex-1"
             value={searchAircraftNumber}
             onChange={(e) => setSearchAircraftNumber(e.target.value)}
           />
           <select
-            className="border p-2 flex-1"
+            className="border border-gray-300 bg-white text-gray-800 p-2 rounded flex-1"
             value={searchAircraftModel}
             onChange={(e) => setSearchAircraftModel(e.target.value)}
           >
@@ -157,43 +156,47 @@ const AircraftManagement = () => {
               <option key={index} value={model}>{model}</option>
             ))}
           </select>
-          <button onClick={fetchAircrafts} className="bg-green-500 text-white px-4 py-2 rounded">
+          <button onClick={fetchAircrafts} className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
             Search
           </button>
         </div>
       </div>
 
-      {/* Aircraft List */}
-      <h4 className="text-lg font-semibold mt-4">Aircraft List</h4>
-      {isSearching ? (
-        <p className="text-blue-500 mt-2">🔄 Searching...</p>
-      ) : searchError ? (
-        <p className="text-red-500 mt-2">{searchError}</p>
-      ) : aircrafts.length === 0 ? (
-        <p className="text-gray-600 mt-2">No aircrafts found.</p>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300 mt-2">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">Aircraft Number</th>
-              <th className="border p-2">Model</th>
-              <th className="border p-2">Economy Seats</th>
-              <th className="border p-2">Premium Seats</th>
-            </tr>
-          </thead>
-          <tbody>
-            {aircrafts.map((aircraft: Aircraft, index) => (
-              <tr key={index} className="border">
-                <td className="border p-2">{aircraft.aircraftNumber}</td>
-                <td className="border p-2">{aircraft.aircraftModel}</td>
-                <td className="border p-2">{aircraft.economySeats}</td>
-                <td className="border p-2">{aircraft.premiumSeats}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
 
+      {/* Aircraft List */}
+      <div className="bg-white border p-4 rounded shadow">
+        <h4 className="text-lg font-semibold mb-3 text-blue-700">📋 Aircraft List</h4>
+        {isSearching ? (
+          <p className="text-blue-500">🔄 Searching...</p>
+        ) : searchError ? (
+          <p className="text-red-500">{searchError}</p>
+        ) : aircrafts.length === 0 ? (
+          <p className="text-gray-600">No aircrafts found.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border border-gray-300 text-gray-900">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  <th className="p-3 border">Aircraft Number</th>
+                  <th className="p-3 border">Model</th>
+                  <th className="p-3 border">Economy Seats</th>
+                  <th className="p-3 border">Premium Seats</th>
+                </tr>
+              </thead>
+              <tbody>
+                {aircrafts.map((aircraft: Aircraft, index) => (
+                  <tr key={index} className="hover:bg-blue-50">
+                    <td className="p-3 border font-medium">{aircraft.aircraftNumber}</td>
+                    <td className="p-3 border">{aircraft.aircraftModel}</td>
+                    <td className="p-3 border">{aircraft.economySeats}</td>
+                    <td className="p-3 border">{aircraft.premiumSeats}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

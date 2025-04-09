@@ -25,7 +25,7 @@ const EditFlight = () => {
   }, [flightId]);
 
   const handleUpdate = async () => {
-    const originalDateTime = new Date(`${flight.departureDate}T${flight.departureTime}`);
+    const originalDateTime = new Date(`${flight.departureDate}T${flight.departureTime}:00`);
     const updatedDateTime = new Date(`${newDepartureDate}T${newDepartureTime}`);
 
     if (isNaN(updatedDateTime.getTime())) {
@@ -92,41 +92,56 @@ const EditFlight = () => {
   const isEditable = isUpcoming && flight.status !== "CANCELLED";
 
   return (
-    <div className="p-6 bg-white shadow rounded max-w-xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">✏️ Edit Flight</h2>
-
-      <p><strong>Aircraft:</strong> {flight.aircraftNumber}</p>
-      <p><strong>Route:</strong> {flight.route?.startLocation} → {flight.route?.endLocation}</p>
-      <p><strong>Status:</strong> {flight.status}</p>
-      <p><strong>Current Departure:</strong> {flight.departureDate} {flight.departureTime}</p>
-      <p><strong>Arrival:</strong> {flight.arrivalDate} {flight.arrivalTime}</p>
-
+    <div className="p-6 bg-white shadow-lg rounded-lg max-w-xl mx-auto">
+      <h2 className="text-3xl font-bold text-blue-700 mb-6 text-center">✏️ Edit Flight</h2>
+  
+      {/* Flight Info */}
+      <div className="bg-gray-100 p-4 rounded mb-6 text-gray-800">
+        <p className="mb-1"><span className="font-semibold">Aircraft:</span> {flight.aircraftNumber}</p>
+        <p className="mb-1">
+          <span className="font-semibold">Route:</span> {flight.route?.startLocation} → {flight.route?.endLocation}
+        </p>
+        <p className="mb-1"><span className="font-semibold">Status:</span> {flight.status}</p>
+        <p className="mb-1"><span className="font-semibold">Current Departure:</span> {flight.departureDate} {flight.departureTime}</p>
+        <p><span className="font-semibold">Arrival:</span> {flight.arrivalDate} {flight.arrivalTime}</p>
+      </div>
+  
+      {/* Editable Form */}
       {isEditable ? (
         <>
-          <label className="block mt-4">New Departure Date:</label>
+          <label className="block mb-1 text-sm text-gray-700">New Departure Date</label>
           <input
             type="date"
             value={newDepartureDate}
             onChange={(e) => setNewDepartureDate(e.target.value)}
-            className="border p-2 w-full"
+            className="border p-2 w-full mb-4 rounded bg-white text-gray-800"
           />
-
-          <label className="block mt-2">New Departure Time:</label>
+  
+          <label className="block mb-1 text-sm text-gray-700">New Departure Time</label>
           <input
             type="time"
             value={newDepartureTime}
             onChange={(e) => setNewDepartureTime(e.target.value)}
-            className="border p-2 w-full"
+            className="border p-2 w-full mb-4 rounded bg-white text-gray-800"
           />
-
+  
           <div className="mt-4 flex flex-wrap gap-4">
-            <button onClick={handleUpdate} className="bg-blue-600 text-white px-4 py-2 rounded">
+            <button
+              onClick={handleUpdate}
+              className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+            >
               Update Flight
             </button>
-            <button onClick={handleCancel} className="bg-red-600 text-white px-4 py-2 rounded">
+            <button
+              onClick={handleCancel}
+              className="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700 transition"
+            >
               Cancel Flight
             </button>
-            <button onClick={() => navigate("/admin")} className="bg-gray-500 text-white px-4 py-2 rounded">
+            <button
+              onClick={() => navigate("/admin")}
+              className="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600 transition"
+            >
               Back to Admin Page
             </button>
           </div>
@@ -136,13 +151,16 @@ const EditFlight = () => {
           <p className="mt-6 text-gray-600 italic">
             This flight is either in the past or has been cancelled. No further changes are allowed.
           </p>
-          <button onClick={() => navigate("/admin")} className="mt-6 bg-gray-500 text-white px-4 py-2 rounded">
+          <button
+            onClick={() => navigate("/admin")}
+            className="mt-6 bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600 transition"
+          >
             Back to Admin Page
           </button>
         </>
       )}
     </div>
-  );
+  );  
 };
 
 export default EditFlight;

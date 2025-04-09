@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Flight, IFlight } from "../models/Flight";
 import Route, { IRoute } from "../models/Route";
+import Aircraft, { IAircraft } from "../models/Aircraft";
 import mongoose from "mongoose";
 
 /** ✅ Helper Function to Calculate Arrival Date & Time */
@@ -11,7 +12,7 @@ const calculateArrivalDetails = (departureDate: string, departureTime: string, d
   depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
 
   return {
-    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
+    arrivalDate: depDateTime.toLocaleDateString("en-CA"), // Format: YYYY-MM-DD
     arrivalTime: depDateTime.toTimeString().slice(0, 5),   // HH:MM format
   };
 };
@@ -98,6 +99,12 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    const aircraft = await Aircraft.findOne({ aircraftNumber });
+    if (!aircraft) {
+      res.status(404).json({ message: "Aircraft not found." });
+      return;
+    }
+
     const { arrivalDate, arrivalTime } = calculateArrivalDetails(departureDate, departureTime, route.duration);
 
     const newFlight = new Flight({
@@ -110,6 +117,14 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
       economyPrice,
       premiumPrice,
       status: "OK",
+      bookedSeats: {
+        economy: [],
+        premium: [],
+      },
+      availableSeats: {
+        economy: Array.from({ length: aircraft.economySeats }, (_, i) => i + 1),
+        premium: Array.from({ length: aircraft.premiumSeats }, (_, i) => i + 1),
+      },
     });
 
     await newFlight.save();
@@ -121,6 +136,7 @@ export const createFlight = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const getFlightById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -197,7 +213,7 @@ export const updateFlight = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    flight.arrivalDate = depDateTime.toISOString().split("T")[0];
+    flight.arrivalDate = depDateTime.toLocaleDateString("en-CA");    ;
     flight.arrivalTime = depDateTime.toTimeString().slice(0, 5);
 
     await flight.save();
@@ -257,5 +273,58 @@ export const getFlightStats = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const searchFlights = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { start, end, date, class: flightClass } = req.query;
+
+    if (!start || !end || !date || !flightClass) {
+      res.status(400).json({ message: "Missing query parameters" });
+      return;
+    }
+
+    const flights = await Flight.find({
+      route: { $exists: true },
+      departureDate: date,
+      status: { $ne: "CANCELLED" },
+    }).populate<{ route: IRoute }>("route"); // ✅ Only populate the route
+
+    const filtered = flights
+      .filter((flight) => {
+        const route = flight.route;
+        return (
+          route &&
+          route.startLocation === start &&
+          route.endLocation === end
+        );
+      })
+      .map((flight) => {
+        const route = flight.route;
+
+        return {
+          _id: flight._id,
+          aircraftNumber: flight.aircraftNumber, // ✅ Directly from Flight model
+          departureTime: flight.departureTime,
+          arrivalTime: flight.arrivalTime,
+          duration: route?.duration || "00:00",
+          price:
+            flightClass === "Economy"
+              ? flight.economyPrice
+              : flight.premiumPrice,
+        };
+      });
+
+    res.status(200).json(filtered);
+  } catch (err) {
+    console.error("❌ Error searching flights:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+
+
+
 
 

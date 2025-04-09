@@ -26,13 +26,18 @@ interface Flight {
   status: string;
 }
 
-
-
-/** 🔹 Convert Date to Readable Format */
+/** 🔹 Convert YYYY-MM-DD to readable format without time zone issues */
 const formatDate = (dateStr: string): string => {
-  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
-  return new Date(dateStr).toLocaleDateString("en-US", options);
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day)); // UTC-safe
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC", // Ensure no local time zone affects it
+  });
 };
+
 
 /** 🔹 Convert Time to 12-hour Format */
 const formatTime = (timeStr: string): string => {
@@ -43,32 +48,24 @@ const formatTime = (timeStr: string): string => {
 };
 
 /** 🔹 Calculate Arrival Date & Time */
-
 const calculateArrivalDetails = (departureDate: string, departureTime: string, routeDuration: string) => {
   if (!departureDate || !departureTime || !routeDuration) return { arrivalDate: "", arrivalTime: "" };
-
 
   const [year, month, day] = departureDate.split("-").map(Number);
   const [depHours, depMinutes] = departureTime.split(":").map(Number);
   const [durationHours, durationMinutes] = routeDuration.split(":").map(Number);
 
-
   const depDateTime = new Date(year, month - 1, day, depHours, depMinutes);
 
-
-
-
-  depDateTime.setHours(depDateTime.getHours() + durationHours);
-  depDateTime.setMinutes(depDateTime.getMinutes() + durationMinutes);
+  const durationInMs = (durationHours * 60 + durationMinutes) * 60 * 1000;
+  const arrivalDateTime = new Date(depDateTime.getTime() + durationInMs);
 
   return {
-
-
-    arrivalDate: depDateTime.toISOString().split("T")[0], // YYYY-MM-DD format
-    arrivalTime: depDateTime.toTimeString().slice(0, 5), // HH:MM format
-
+    arrivalDate: arrivalDateTime.toISOString().split("T")[0], // ✅ Safer and consistent YYYY-MM-DD
+    arrivalTime: arrivalDateTime.toTimeString().slice(0, 5),   // HH:MM format
   };
 };
+
 
 const FlightManagement = () => {
   // Inside FlightManagement component
@@ -208,129 +205,149 @@ const FlightManagement = () => {
 
   return (
     <div className="bg-white p-6 rounded shadow-lg mb-8">
-      <h3 className="text-xl font-semibold mb-4">✈️ Flight Management</h3>
+      <h3 className="text-2xl font-bold mb-6 text-blue-700">✈️ Flight Management</h3>
 
       {/* Add Flight Section */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h4 className="text-lg font-semibold mb-2">➕ Add Flight</h4>
+      <div className="mb-6 p-4 border rounded bg-gray-100">
+        <h4 className="text-lg font-semibold mb-4 text-gray-700">➕ Add Flight</h4>
 
-        <label>Aircraft</label>
-        <select name="aircraftNumber" className="border p-2 w-full mb-2" value={newFlight.aircraftNumber} onChange={handleInputChange}>
+        <label className="block mb-1 text-sm text-gray-700">Aircraft</label>
+        <select name="aircraftNumber" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.aircraftNumber} onChange={handleInputChange}>
           <option value="">Select Aircraft</option>
           {aircrafts.map((aircraft) => (
             <option key={aircraft.aircraftNumber} value={aircraft.aircraftNumber}>{aircraft.aircraftNumber}</option>
           ))}
         </select>
 
-        <label>Route</label>
-        <select name="routeId" className="border p-2 w-full mb-2" value={newFlight.routeId} onChange={handleInputChange}>
+        <label className="block mb-1 text-sm text-gray-700">Route</label>
+        <select name="routeId" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.routeId} onChange={handleInputChange}>
           <option value="">Select Route</option>
           {routes.map((route) => (
             <option key={route._id} value={route._id}>{route.startLocation} → {route.endLocation}</option>
           ))}
         </select>
 
-        <label>Departure Date</label>
-        <input type="date" name="departureDate" className="border p-2 w-full mb-2" value={newFlight.departureDate} onChange={handleInputChange} />
+        <label className="block mb-1 text-sm text-gray-700">Departure Date</label>
+        <input type="date" name="departureDate" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.departureDate} onChange={handleInputChange} />
 
-        <label>Departure Time</label>
-        <input type="time" name="departureTime" className="border p-2 w-full mb-2" value={newFlight.departureTime} onChange={handleInputChange} />
+        <label className="block mb-1 text-sm text-gray-700">Departure Time</label>
+        <input type="time" name="departureTime" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.departureTime} onChange={handleInputChange} />
 
-        <label>Economy Price</label>
-        <input type="text" name="economyPrice" className="border p-2 w-full mb-2" value={newFlight.economyPrice} onChange={handleInputChange} />
+        <label className="block mb-1 text-sm text-gray-700">Economy Price</label>
+        <input type="text" name="economyPrice" placeholder="e.g. 100" className="border p-2 w-full rounded mb-3 bg-white placeholder-gray-500 text-gray-800" value={newFlight.economyPrice} onChange={handleInputChange} />
 
-        <label>Premium Price</label>
-        <input type="text" name="premiumPrice" className="border p-2 w-full mb-2" value={newFlight.premiumPrice} onChange={handleInputChange} />
+        <label className="block mb-1 text-sm text-gray-700">Premium Price</label>
+        <input type="text" name="premiumPrice" placeholder="e.g. 200" className="border p-2 w-full rounded mb-4 bg-white placeholder-gray-500 text-gray-800" value={newFlight.premiumPrice} onChange={handleInputChange} />
 
-        <button onClick={addFlight} className="bg-blue-500 text-white px-4 py-2 rounded">Add Flight</button>
+        <button onClick={addFlight} className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition">
+          Add Flight
+        </button>
       </div>
 
       {/* Search Flights Section */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h4 className="text-lg font-semibold mb-2">🔍 Search Flights</h4>
+      <div className="mb-6 p-4 border rounded bg-gray-100">
+        <h4 className="text-lg font-semibold mb-4 text-gray-700">🔍 Search Flights</h4>
 
-        <input type="text" placeholder="Aircraft Number" className="border p-2 w-full mb-2"
-          value={searchParams.aircraftNumber} onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })} />
+        <input
+          type="text"
+          placeholder="Aircraft Number"
+          className="border p-2 w-full rounded mb-3 bg-white placeholder-gray-500 text-gray-800"
+          value={searchParams.aircraftNumber}
+          onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })}
+        />
 
-        <select className="border p-2 w-full mb-2" value={searchParams.startLocation}
-          onChange={(e) => setSearchParams({ ...searchParams, startLocation: e.target.value })}>
+        <select
+          className="border p-2 w-full rounded mb-3 bg-white text-gray-800"
+          value={searchParams.startLocation}
+          onChange={(e) => setSearchParams({ ...searchParams, startLocation: e.target.value })}
+        >
           <option value="">Select Start Location</option>
           {routes.map((route) => (
             <option key={route._id} value={route.startLocation}>{route.startLocation}</option>
           ))}
         </select>
 
-        <select className="border p-2 w-full mb-2" value={searchParams.endLocation}
-          onChange={(e) => setSearchParams({ ...searchParams, endLocation: e.target.value })}>
+        <select
+          className="border p-2 w-full rounded mb-3 bg-white text-gray-800"
+          value={searchParams.endLocation}
+          onChange={(e) => setSearchParams({ ...searchParams, endLocation: e.target.value })}
+        >
           <option value="">Select End Location</option>
           {routes.map((route) => (
             <option key={route._id} value={route.endLocation}>{route.endLocation}</option>
           ))}
         </select>
 
-        <select className="border p-2 w-full mb-2" value={searchParams.type}
-          onChange={(e) => setSearchParams({ ...searchParams, type: e.target.value })}>
+        <select
+          className="border p-2 w-full rounded mb-4 bg-white text-gray-800"
+          value={searchParams.type}
+          onChange={(e) => setSearchParams({ ...searchParams, type: e.target.value })}
+        >
           <option value="All">All Flights</option>
           <option value="Upcoming">Upcoming Flights</option>
           <option value="Previous">Previous Flights</option>
         </select>
 
-        <button onClick={fetchFlights} className="bg-green-500 text-white px-4 py-2 rounded">Search Flights</button>
+        <button onClick={fetchFlights} className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">
+          Search Flights
+        </button>
       </div>
 
       {/* Display Flights */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h4 className="text-lg font-semibold mb-4">🛫 Flight Results</h4>
+      <div className="mb-6 p-4 border rounded bg-gray-100">
+        <h4 className="text-lg font-semibold mb-4 text-gray-700">🛫 Flight Results</h4>
 
         {flights.length === 0 ? (
-          <p className="text-gray-500">No flights found.</p>
+          <p className="text-gray-600">No flights found.</p>
         ) : (
-          <table className="w-full text-left border border-gray-300">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-2 border">Aircraft</th>
-                <th className="p-2 border">Start Location</th>
-                <th className="p-2 border">End Location</th>
-                <th className="p-2 border">Departure Date</th>
-                <th className="p-2 border">Departure Time</th>
-                <th className="p-2 border">Arrival Date</th>
-                <th className="p-2 border">Arrival Time</th>
-                <th className="p-2 border">Economy Price</th>
-                <th className="p-2 border">Premium Price</th>
-                <th className="p-2 border">Status</th>
-                <th className="p-2 border">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {flights.map((flight) => (
-                <tr key={flight._id}>
-                  <td className="p-2 border">{flight.aircraftNumber}</td>
-                  <td className="p-2 border">{flight.route?.startLocation || "N/A"}</td>
-                  <td className="p-2 border">{flight.route?.endLocation || "N/A"}</td>
-                  <td className="p-2 border">{formatDate(flight.departureDate)}</td>
-                  <td className="p-2 border">{formatTime(flight.departureTime)}</td>
-                  <td className="p-2 border">{formatDate(flight.arrivalDate)}</td>
-                  <td className="p-2 border">{formatTime(flight.arrivalTime)}</td>
-                  <td className="p-2 border">${flight.economyPrice}</td>
-                  <td className="p-2 border">${flight.premiumPrice}</td>
-                  <td className="p-2 border">{flight.status}</td>
-                  <td className="p-2 border">
-                    <button
-                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                      onClick={() => navigate(`/flights/${flight._id}`)}
-                    >
-                      Select
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border border-gray-300">
+              <thead className="bg-blue-100 text-blue-700">
+                <tr>
+                  <th className="p-3 border">Aircraft</th>
+                  <th className="p-3 border">Start Location</th>
+                  <th className="p-3 border">End Location</th>
+                  <th className="p-3 border">Departure Date</th>
+                  <th className="p-3 border">Departure Time</th>
+                  <th className="p-3 border">Arrival Date</th>
+                  <th className="p-3 border">Arrival Time</th>
+                  <th className="p-3 border">Economy Price</th>
+                  <th className="p-3 border">Premium Price</th>
+                  <th className="p-3 border">Status</th>
+                  <th className="p-3 border">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="text-gray-800">
+                {flights.map((flight) => (
+                  <tr key={flight._id} className="hover:bg-gray-50">
+                    <td className="p-3 border">{flight.aircraftNumber}</td>
+                    <td className="p-3 border">{flight.route?.startLocation || "N/A"}</td>
+                    <td className="p-3 border">{flight.route?.endLocation || "N/A"}</td>
+                    <td className="p-3 border">{formatDate(flight.departureDate)}</td>
+                    <td className="p-3 border">{formatTime(flight.departureTime)}</td>
+                    <td className="p-3 border">{formatDate(flight.arrivalDate)}</td>
+                    <td className="p-3 border">{formatTime(flight.arrivalTime)}</td>
+                    <td className="p-3 border">${flight.economyPrice}</td>
+                    <td className="p-3 border">${flight.premiumPrice}</td>
+                    <td className="p-3 border">{flight.status}</td>
+                    <td className="p-3 border">
+                      <button
+                        className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600 transition"
+                        onClick={() => navigate(`/flights/${flight._id}`)}
+                      >
+                        Select
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
-
     </div>
   );
+
 };
 
 export default FlightManagement;

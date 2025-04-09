@@ -3,6 +3,8 @@ import { User } from "../models/User";
 import { registerUser, authenticateUser } from "../services/authService";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
+import { MulterRequest } from "./types"; // Create this interface OR define inline
+import bcrypt from "bcryptjs"; // ✅ Correct way for bcryptjs
 
 dotenv.config();
 
@@ -27,9 +29,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       mailingAddress,
       passportNumber,
       emergencyContactDetails,
+      role // ✅ capture the role from the body
     } = req.body;
-
-    let role: "admin" | "user" = req.headers["x-role"] === "admin" ? "admin" : "user";
 
     if (!email || !password || !userName) {
       res.status(400).json({ message: "Username, email, and password are required." });
@@ -39,7 +40,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const newUser = await registerUser(
       email,
       password,
-      role,
+      role || "user", // ✅ Use 'role' from request body or fallback to 'user'
       userName,
       userImage || "",
       dateOfBirth || "",
@@ -58,6 +59,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ message: error instanceof Error ? error.message : "An error occurred" });
   }
 };
+
 
 /** ✅ Login User & Generate Tokens */
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -118,3 +120,69 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const changePassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.userId;
+    const { newPassword } = req.body;
+    if (!newPassword) {
+      res.status(400).json({ message: "New password is required." });
+      return;
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await User.findByIdAndUpdate(userId, { password: hashed });
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("❌ Change Password Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateProfileImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.userId;
+
+    if (!req.file) {
+      res.status(400).json({ message: "No image file uploaded" });
+      return;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        userImage: {
+          data: req.file.buffer,
+          contentType: req.file.mimetype,
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Image updated successfully", userImage: updatedUser?.userImage });
+  } catch (err) {
+    console.error("❌ Error uploading profile image:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.userId;
+    const updates = req.body;
+
+    const user = await User.findByIdAndUpdate(userId, updates, { new: true }).select("-password");
+    if (!user) {
+      res.status(404).json({ message: "User not found." });
+      return;
+    }
+
+    res.status(200).json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    console.error("❌ Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+

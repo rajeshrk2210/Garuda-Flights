@@ -1,13 +1,21 @@
 import { Router } from "express";
-import { getFlights, createFlight, updateFlight, getFlightById, getFlightStats } from "../controllers/flightController";
+import {
+    getFlights,
+    createFlight,
+    updateFlight,
+    getFlightById,
+    getFlightStats,
+    searchFlights, // ✅ Import this
+  } from "../controllers/flightController";
 import { authenticateUser, authorizeAdmin } from "../middlewares/authMiddleware";
 
 const router = Router();
 
 /**
- * ✅ Define this first to prevent it being caught by `/:id`
+ * ✅ Place static routes first
  */
 router.get("/stats", authenticateUser, authorizeAdmin, getFlightStats);
+router.get("/search", authenticateUser, searchFlights); // ✅ Add this before `/:id`
 
 /**
  * @route   GET /api/flights
