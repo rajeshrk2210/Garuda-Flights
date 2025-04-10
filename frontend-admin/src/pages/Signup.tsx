@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import apiURL from "../config/config";
 
 const Signup = () => {
   const navigate = useNavigate();
 
-  // ✅ Ensure all fields match backend expectations
   const [formData, setFormData] = useState({
-    userName: "", // 🔹 Changed from username to userName
-    dateOfBirth: "", // 🔹 Changed from dob to dateOfBirth
+    userName: "",
+    dateOfBirth: "",
     gender: "",
     nationality: "",
     email: "",
-    phoneNumber: "", // 🔹 Changed from phone to phoneNumber
-    alternatePhoneNumber: "", // 🔹 Changed from alternatePhone
-    mailingAddress: "", // 🔹 Changed from address
+    phoneNumber: "",
+    alternatePhoneNumber: "",
+    mailingAddress: "",
     passportNumber: "",
-    emergencyContactDetails: "", // 🔹 Changed from emergencyContact
+    emergencyContactDetails: "",
     password: "",
   });
 
@@ -34,9 +34,8 @@ const Signup = () => {
       return;
     }
 
-    // ✅ Convert empty strings to ""
     const sanitizedData = {
-      role: "admin", // ✅ Force role to admin
+      role: "admin",
       userName: formData.userName.trim(),
       email: formData.email.trim(),
       password: formData.password,
@@ -49,10 +48,9 @@ const Signup = () => {
       passportNumber: formData.passportNumber || "",
       emergencyContactDetails: formData.emergencyContactDetails || "",
     };
-    
 
     try {
-      const response = await fetch("http://localhost:5000/auth/register", {
+      const response = await fetch(`${apiURL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,58 +68,178 @@ const Signup = () => {
         setMessage(`Error: ${data.message}`);
       }
     } catch (error) {
-      setMessage("Something went wrong. Please try again.");
+      setMessage(String(error) || "Something went wrong. Please try again.");
     }
   };
 
-
-
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSignup} className="bg-white shadow-lg rounded-lg p-8 w-full max-w-2xl">
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Admin Signup</h2>
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center py-8 px-6">
+      <form
+        onSubmit={handleSignup}
+        className="bg-white rounded-xl shadow-sm p-6 w-full max-w-2xl border border-gray-200"
+      >
+        <h2 className="text-3xl font-bold text-teal-700 mb-8 text-center">Admin Signup</h2>
 
         {/* Basic Information */}
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Basic Information</h3>
-        <input type="text" name="userName" placeholder="User Name *" className="input" value={formData.userName} onChange={handleChange} required />
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Basic Information</h3>
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">User Name *</label>
+          <input
+            type="text"
+            name="userName"
+            placeholder="User Name"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.userName}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-        {/* DOB */}
-        <label className="block text-gray-700 text-sm font-medium mt-2">Date of Birth (Optional)</label>
-        <input type="date" name="dateOfBirth" className="input" value={formData.dateOfBirth} onChange={handleChange} />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Date of Birth (Optional)</label>
+          <input
+            type="date"
+            name="dateOfBirth"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+          />
+        </div>
 
-        <select name="gender" className="input" value={formData.gender} onChange={handleChange}>
-          <option value="">Select Gender (Optional)</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-        <input type="text" name="nationality" placeholder="Nationality (Optional)" className="input" value={formData.nationality} onChange={handleChange} />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Gender (Optional)</label>
+          <select
+            name="gender"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={formData.gender}
+            onChange={handleChange}
+          >
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Nationality (Optional)</label>
+          <input
+            type="text"
+            name="nationality"
+            placeholder="Nationality"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.nationality}
+            onChange={handleChange}
+          />
+        </div>
 
         {/* Contact Details */}
-        <h3 className="text-lg font-semibold text-gray-700 mt-4 mb-2">Contact Details</h3>
-        <input type="email" name="email" placeholder="Email Address *" className="input" value={formData.email} onChange={handleChange} required />
-        <input type="text" name="phoneNumber" placeholder="Phone Number (Optional)" className="input" value={formData.phoneNumber} onChange={handleChange} />
-        <input type="text" name="alternatePhoneNumber" placeholder="Alternate Phone (Optional)" className="input" value={formData.alternatePhoneNumber} onChange={handleChange} />
+        <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-4">Contact Details</h3>
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Email Address *</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Phone Number (Optional)</label>
+          <input
+            type="text"
+            name="phoneNumber"
+            placeholder="Phone Number"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Alternate Phone (Optional)</label>
+          <input
+            type="text"
+            name="alternatePhoneNumber"
+            placeholder="Alternate Phone"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.alternatePhoneNumber}
+            onChange={handleChange}
+          />
+        </div>
 
         {/* Address */}
-        <input type="text" name="mailingAddress" placeholder="Mailing Address (Optional)" className="input" value={formData.mailingAddress} onChange={handleChange} />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Mailing Address (Optional)</label>
+          <input
+            type="text"
+            name="mailingAddress"
+            placeholder="Mailing Address"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.mailingAddress}
+            onChange={handleChange}
+          />
+        </div>
 
         {/* Identity & Verification */}
-        <h3 className="text-lg font-semibold text-gray-700 mt-4 mb-2">Identity & Verification</h3>
-        <input type="text" name="passportNumber" placeholder="Passport Number (Optional)" className="input" value={formData.passportNumber} onChange={handleChange} />
-        <input type="text" name="emergencyContactDetails" placeholder="Emergency Contact Details (Optional)" className="input" value={formData.emergencyContactDetails} onChange={handleChange} />
+        <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-4">Identity & Verification</h3>
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Passport Number (Optional)</label>
+          <input
+            type="text"
+            name="passportNumber"
+            placeholder="Passport Number"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.passportNumber}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Emergency Contact Details (Optional)</label>
+          <input
+            type="text"
+            name="emergencyContactDetails"
+            placeholder="Emergency Contact Details"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.emergencyContactDetails}
+            onChange={handleChange}
+          />
+        </div>
 
         {/* Security & Account Settings */}
-        <h3 className="text-lg font-semibold text-gray-700 mt-4 mb-2">Security & Account Settings</h3>
-        <input type="password" name="password" placeholder="Password *" className="input w-full" value={formData.password} onChange={handleChange} required />
+        <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-4">Security & Account Settings</h3>
+        <div className="mb-6">
+          <label className="text-sm font-medium text-gray-600">Password *</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
         {/* Submit Button */}
-        <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded-md mt-6 hover:bg-blue-600 transition duration-300">
+        <button
+          type="submit"
+          className="w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition duration-200"
+        >
           Sign Up
         </button>
 
         {/* Registration Status Message */}
-        {message && <p className="mt-4 text-center text-red-500">{message}</p>}
+        {message && (
+          <p className={`mt-4 text-center ${message.includes("successful") ? "text-teal-600" : "text-red-600"}`}>
+            {message}
+          </p>
+        )}
       </form>
     </div>
   );
