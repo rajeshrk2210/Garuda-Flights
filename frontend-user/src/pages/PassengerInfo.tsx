@@ -77,95 +77,188 @@ const PassengerInfo = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-6 text-blue-700">👤 Passenger Information</h2>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+        {/* Header */}
+        <h2 className="text-3xl font-bold text-teal-800 mb-8 text-center">
+          👤 Passenger Information
+        </h2>
 
-      {/* Passenger Fields */}
-      {passengers.map((passenger, idx) => (
-        <div key={idx} className="border border-gray-300 p-4 rounded mb-4 bg-gray-50">
-          <h3 className="font-semibold text-lg mb-3 text-gray-700">Passenger {idx + 1}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="First Name"
-              value={passenger.firstName}
-              onChange={(e) => handlePassengerChange(idx, "firstName", e.target.value)}
-              className="border p-2 rounded"
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={passenger.lastName}
-              onChange={(e) => handlePassengerChange(idx, "lastName", e.target.value)}
-              className="border p-2 rounded"
-            />
-            <select
-              value={passenger.gender}
-              onChange={(e) => handlePassengerChange(idx, "gender", e.target.value)}
-              className="border p-2 rounded"
-            >
-              <option value="">Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-            <input
-              type="date"
-              value={passenger.dateOfBirth}
-              onChange={(e) => handlePassengerChange(idx, "dateOfBirth", e.target.value)}
-              className="border p-2 rounded"
-            />
+        {/* Passenger Fields */}
+        {passengers.map((passenger, idx) => (
+          <div
+            key={idx}
+            className="mb-6 p-6 bg-gray-50 rounded-lg border border-gray-200"
+          >
+            <h3 className="text-xl font-semibold text-teal-700 mb-4">
+              Passenger {idx + 1}
+            </h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor={`firstName-${idx}`}
+                  className="flex text-sm font-medium text-gray-700 mb-1"
+                >
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  id={`firstName-${idx}`}
+                  placeholder="Enter first name"
+                  value={passenger.firstName}
+                  onChange={(e) => handlePassengerChange(idx, "firstName", e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400 text-gray-800"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor={`lastName-${idx}`}
+                  className="flex text-sm font-medium text-gray-700 mb-1"
+                >
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  id={`lastName-${idx}`}
+                  placeholder="Enter last name"
+                  value={passenger.lastName}
+                  onChange={(e) => handlePassengerChange(idx, "lastName", e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400 text-gray-800"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor={`gender-${idx}`}
+                  className="flex text-sm font-medium text-gray-700 mb-1"
+                >
+                  Gender *
+                </label>
+                <select
+                  id={`gender-${idx}`}
+                  value={passenger.gender}
+                  onChange={(e) => handlePassengerChange(idx, "gender", e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-800"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor={`dateOfBirth-${idx}`}
+                  className="flex text-sm font-medium text-gray-700 mb-1"
+                >
+                  Date of Birth *
+                </label>
+                <input
+                  type="date"
+                  id={`dateOfBirth-${idx}`}
+                  value={passenger.dateOfBirth}
+                  onChange={(e) => handlePassengerChange(idx, "dateOfBirth", e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-800"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Contact Info */}
+        <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+          <h3 className="text-xl font-semibold text-teal-700 mb-4">📞 Contact Details</h3>
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="contactPerson"
+                className="flex text-sm font-medium text-gray-700 mb-1"
+              >
+                Contact Person *
+              </label>
+              <select
+                id="contactPerson"
+                value={contactInfo.contactPerson}
+                onChange={(e) =>
+                  setContactInfo({ ...contactInfo, contactPerson: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-800"
+              >
+                <option value="">Select Contact Person</option>
+                {passengers.map((p, idx) => {
+                  const fullName = `${p.firstName} ${p.lastName}`.trim();
+                  return (
+                    <option key={idx} value={fullName}>
+                      {fullName || `Passenger ${idx + 1}`}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <div>
+              <label
+                htmlFor="country"
+                className="flex text-sm font-medium text-gray-700 mb-1"
+              >
+                Country *
+              </label>
+              <input
+                type="text"
+                id="country"
+                placeholder="Enter country"
+                value={contactInfo.country}
+                onChange={(e) =>
+                  setContactInfo({ ...contactInfo, country: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400 text-gray-800"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="mobile"
+                className="flex text-sm font-medium text-gray-700 mb-1"
+              >
+                Mobile Number *
+              </label>
+              <input
+                type="tel"
+                id="mobile"
+                placeholder="Enter mobile number"
+                value={contactInfo.mobile}
+                onChange={(e) =>
+                  setContactInfo({ ...contactInfo, mobile: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400 text-gray-800"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="email"
+                className="flex text-sm font-medium text-gray-700 mb-1"
+              >
+                Email Address *
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="Enter email address"
+                value={contactInfo.email}
+                onChange={(e) =>
+                  setContactInfo({ ...contactInfo, email: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400 text-gray-800"
+              />
+            </div>
           </div>
         </div>
-      ))}
 
-      {/* Contact Info */}
-      <div className="mt-6 border border-gray-300 p-4 rounded bg-gray-50">
-        <h3 className="text-lg font-semibold mb-4 text-gray-700">📞 Contact Details</h3>
-        <select
-          value={contactInfo.contactPerson}
-          onChange={(e) => setContactInfo({ ...contactInfo, contactPerson: e.target.value })}
-          className="border p-2 rounded w-full mb-3"
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          className="w-full bg-teal-700 text-white py-3 rounded-lg hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-500 transition duration-300 font-semibold shadow-md"
         >
-          <option value="">Select Contact Person</option>
-          {passengers.map((p, idx) => {
-            const fullName = `${p.firstName} ${p.lastName}`.trim();
-            return (
-              <option key={idx} value={fullName}>
-                {fullName || `Passenger ${idx + 1}`}
-              </option>
-            );
-          })}
-        </select>
-        <input
-          type="text"
-          placeholder="Country"
-          value={contactInfo.country}
-          onChange={(e) => setContactInfo({ ...contactInfo, country: e.target.value })}
-          className="border p-2 rounded w-full mb-3"
-        />
-        <input
-          type="tel"
-          placeholder="Mobile Number"
-          value={contactInfo.mobile}
-          onChange={(e) => setContactInfo({ ...contactInfo, mobile: e.target.value })}
-          className="border p-2 rounded w-full mb-3"
-        />
-        <input
-          type="email"
-          placeholder="Email Address"
-          value={contactInfo.email}
-          onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
-          className="border p-2 rounded w-full"
-        />
+          ✅ Check Booking Details
+        </button>
       </div>
-
-      <button
-        onClick={handleSubmit}
-        className="mt-6 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-      >
-        ✅ Check Booking Details
-      </button>
     </div>
   );
 };

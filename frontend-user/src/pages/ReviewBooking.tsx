@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatTime } from "../utils/formatTime";
 
 const ReviewBooking = () => {
   const navigate = useNavigate();
@@ -27,10 +28,9 @@ const ReviewBooking = () => {
       weekday: "short",
       month: "short",
       day: "numeric",
-      year: "numeric"
+      year: "numeric",
     });
   };
-  
 
   if (!booking || !passengerData) {
     return <p className="text-center mt-10 text-gray-600">Loading booking details...</p>;
@@ -51,53 +51,59 @@ const ReviewBooking = () => {
     (tripType === "roundtrip" ? selectedInbound?.price || 0 : 0);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded">
-      <h2 className="text-2xl font-bold mb-6 text-blue-700">📋 Review Your Booking</h2>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-200 my-10">
+      <h2 className="text-2xl font-semibold text-teal-700 mb-8 text-center">📋 Review Your Booking</h2>
 
       {/* Outbound Flight */}
       {selectedOutbound && (
-        <div className="mb-6 border rounded p-4 bg-gray-50">
-          <h3 className="text-lg font-semibold mb-2 text-gray-700">🛫 Outbound Flight</h3>
-          <p><strong>From:</strong> {from}</p>
-          <p><strong>To:</strong> {to}</p>
-          <p><strong>Departure Date:</strong> {formatDate(selectedOutbound.departureDate)}</p>
-          <p><strong>Departure Time:</strong> {selectedOutbound.departureTime}</p>
-          <p><strong>Arrival Date:</strong> {formatDate(selectedOutbound.arrivalDate)}</p>
-          <p><strong>Arrival Time:</strong> {selectedOutbound.arrivalTime}</p>
-          <p><strong>Duration:</strong> {selectedOutbound.duration}</p>
-          <p><strong>Class:</strong> {flightClass}</p>
-          <p><strong>Price:</strong> ₹{selectedOutbound.price}</p>
+        <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">🛫 Outbound Flight</h3>
+          <div className="space-y-2 text-left text-gray-800">
+            <p><span className="font-medium">From:</span> {from}</p>
+            <p><span className="font-medium">To:</span> {to}</p>
+            <p><span className="font-medium">Departure Date:</span> {formatDate(selectedOutbound.departureDate)}</p>
+            <p><span className="font-medium">Departure Time:</span> {formatTime(selectedOutbound.departureTime)}</p>
+            <p><span className="font-medium">Arrival Date:</span> {formatDate(selectedOutbound.arrivalDate)}</p>
+            <p><span className="font-medium">Arrival Time:</span> {formatTime(selectedOutbound.arrivalTime)}</p>
+            <p><span className="font-medium">Duration:</span> {selectedOutbound.duration} Hrs</p>
+            <p><span className="font-medium">Class:</span> {flightClass}</p>
+            <p><span className="font-medium">Price:</span> ₹{selectedOutbound.price}</p>
+          </div>
         </div>
       )}
 
       {/* Inbound Flight */}
       {tripType === "roundtrip" && selectedInbound && (
-        <div className="mb-6 border rounded p-4 bg-gray-50">
-          <h3 className="text-lg font-semibold mb-2 text-gray-700">🛬 Return Flight</h3>
-          <p><strong>From:</strong> {to}</p>
-          <p><strong>To:</strong> {from}</p>
-          <p><strong>Departure Date:</strong> {formatDate(selectedInbound.departureDate)}</p>
-          <p><strong>Departure Time:</strong> {selectedInbound.departureTime}</p>
-          <p><strong>Arrival Date:</strong> {formatDate(selectedInbound.arrivalDate)}</p>
-          <p><strong>Arrival Time:</strong> {selectedInbound.arrivalTime}</p>
-          <p><strong>Duration:</strong> {selectedInbound.duration}</p>
-          <p><strong>Class:</strong> {flightClass}</p>
-          <p><strong>Price:</strong> ₹{selectedInbound.price}</p>
+        <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">🛬 Return Flight</h3>
+          <div className="space-y-2 text-left text-gray-800">
+            <p><span className="font-medium">From:</span> {to}</p>
+            <p><span className="font-medium">To:</span> {from}</p>
+            <p><span className="font-medium">Departure Date:</span> {formatDate(selectedInbound.departureDate)}</p>
+            <p><span className="font-medium">Departure Time:</span> {formatTime(selectedInbound.departureTime)}</p>
+            <p><span className="font-medium">Arrival Date:</span> {formatDate(selectedInbound.arrivalDate)}</p>
+            <p><span className="font-medium">Arrival Time:</span> {formatTime(selectedInbound.arrivalTime)}</p>
+            <p><span className="font-medium">Duration:</span> {selectedInbound.duration} Hrs</p>
+            <p><span className="font-medium">Class:</span> {flightClass}</p>
+            <p><span className="font-medium">Price:</span> ₹{selectedInbound.price}</p>
+          </div>
         </div>
       )}
 
       {/* Passenger Details */}
-      <div className="mb-6 border rounded p-4 bg-gray-50">
-        <h3 className="text-lg font-semibold mb-2 text-gray-700">👤 Passenger Details</h3>
-        {passengerData.passengers.map((p: any, idx: number) => (
-          <div key={idx} className="mb-2">
-            <p><strong>Passenger {idx + 1}:</strong> {p.firstName} {p.lastName} | {p.gender} | DOB: {formatDate(p.dateOfBirth)}</p>
-          </div>
-        ))}
+      <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">👤 Passenger Details</h3>
+        <div className="space-y-2 text-left text-gray-800">
+          {passengerData.passengers.map((p: any, idx: number) => (
+            <p key={idx}>
+              <span className="font-medium">Passenger {idx + 1}:</span> {p.firstName} {p.lastName} | {p.gender} | DOB: {formatDate(p.dateOfBirth)}
+            </p>
+          ))}
+        </div>
       </div>
 
       {/* Summary */}
-      <div className="mb-6 text-right text-lg font-semibold">
+      <div className="mb-8 text-right text-lg font-semibold text-gray-800">
         <p>Total Passengers: {passengers}</p>
         <p>Total Price: ₹{totalPrice}</p>
       </div>
@@ -105,7 +111,7 @@ const ReviewBooking = () => {
       <div className="text-center">
         <button
           onClick={() => navigate("/payment")}
-          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+          className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition duration-200"
         >
           Continue to Payment
         </button>
