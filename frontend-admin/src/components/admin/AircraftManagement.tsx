@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import apiURL from "../../config/config";
 
-// Interfaces
 interface Aircraft {
   aircraftNumber: string;
   aircraftModel: string;
@@ -8,7 +8,6 @@ interface Aircraft {
   premiumSeats: number;
 }
 
-// Predefined Aircraft Models
 const aircraftModels = [
   "Boeing 737",
   "Boeing 747",
@@ -50,7 +49,7 @@ const AircraftManagement = () => {
       if (searchAircraftNumber) queryParams.append("aircraftNumber", searchAircraftNumber);
       if (searchAircraftModel) queryParams.append("aircraftModel", searchAircraftModel);
 
-      const response = await fetch(`http://localhost:5000/api/aircrafts?${queryParams.toString()}`);
+      const response = await fetch(`${apiURL}/api/aircrafts?${queryParams.toString()}`);
       if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
 
       const data = await response.json();
@@ -80,7 +79,7 @@ const AircraftManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/aircrafts/add", {
+      const response = await fetch(`${apiURL}/api/aircrafts/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAircraft),

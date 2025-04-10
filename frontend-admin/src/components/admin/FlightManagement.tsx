@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import apiURL from "../../config/config";
 
 // Interfaces
 interface Aircraft {
@@ -98,7 +99,7 @@ const FlightManagement = () => {
   /** 🔹 Fetch Aircrafts */
   const fetchAircrafts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/aircrafts");
+      const response = await fetch(`${apiURL}/api/aircrafts`);
       const data = await response.json();
       setAircrafts(data);
     } catch (error) {
@@ -109,7 +110,7 @@ const FlightManagement = () => {
   /** 🔹 Fetch Routes */
   const fetchRoutes = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/routes");
+      const response = await fetch(`${apiURL}/api/routes`);
       const data = await response.json();
       setRoutes(data);
     } catch (error) {
@@ -132,7 +133,7 @@ const FlightManagement = () => {
       if (searchParams.endLocation) queryParams.append("endLocation", searchParams.endLocation);
       if (searchParams.type !== "All") queryParams.append("type", searchParams.type);
 
-      const response = await fetch(`http://localhost:5000/api/flights?${queryParams.toString()}`, {
+      const response = await fetch(`${apiURL}/api/flights?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -188,7 +189,7 @@ const FlightManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/flights", {
+      const response = await fetch(`${apiURL}/api/flights`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

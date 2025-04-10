@@ -9,6 +9,7 @@ import {
   FaCalendarAlt,
   FaClock,
 } from "react-icons/fa";
+import apiURL from "../config/config";
 
 const Dashboard = () => {
   const [aircrafts, setAircrafts] = useState<number>(0);
@@ -34,10 +35,10 @@ const Dashboard = () => {
         const token = localStorage.getItem("token");
 
         const [aircraftRes, locationsRes, routesRes, flightsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/aircrafts/count"),
-          fetch("http://localhost:5000/api/routes/locations"),
-          fetch("http://localhost:5000/api/routes/count"),
-          fetch("http://localhost:5000/api/flights/stats", {
+          fetch(`${apiURL}/api/aircrafts/count`),
+          fetch(`${apiURL}/api/routes/locations`),
+          fetch(`${apiURL}/api/routes/count`),
+          fetch(`${apiURL}/api/flights/stats`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

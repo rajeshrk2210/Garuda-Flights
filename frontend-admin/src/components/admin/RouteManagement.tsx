@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import apiURL from "../../config/config";
 
 // Predefined Canadian Airport Locations (Airport Name + City)
 const LOCATIONS = [
@@ -52,7 +53,7 @@ const RouteManagement = () => {
       if (searchStart) queryParams.append("startLocation", searchStart);
       if (searchEnd) queryParams.append("endLocation", searchEnd);
 
-      const response = await fetch(`http://localhost:5000/api/routes?${queryParams.toString()}`);
+      const response = await fetch(`${apiURL}/api/routes?${queryParams.toString()}`);
       if (!response.ok) throw new Error(`❌ API Error: ${response.statusText}`);
 
       const data = await response.json();
@@ -91,7 +92,7 @@ const RouteManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/routes/add", {
+      const response = await fetch(`${apiURL}/api/routes/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newRoute),

@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import apiURL from "../config/config";
 
 const EditFlight = () => {
   const { flightId } = useParams();
@@ -11,7 +12,7 @@ const EditFlight = () => {
   useEffect(() => {
     const fetchFlight = async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/flights/${flightId}`, {
+      const res = await fetch(`${apiURL}/api/flights/${flightId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -46,7 +47,7 @@ const EditFlight = () => {
 
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`http://localhost:5000/api/flights/${flightId}`, {
+    const res = await fetch(`${apiURL}/api/flights/${flightId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -69,7 +70,7 @@ const EditFlight = () => {
 
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`http://localhost:5000/api/flights/${flightId}`, {
+    const res = await fetch(`${apiURL}/api/flights/${flightId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

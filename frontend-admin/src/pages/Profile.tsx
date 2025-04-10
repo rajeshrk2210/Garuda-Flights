@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import apiURL from "../config/config";
 
 // Define a type for the profile data
 interface ProfileData {
@@ -26,7 +27,7 @@ const Profile = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/auth/profile", {
+        const res = await fetch(`${apiURL}/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -61,7 +62,7 @@ const Profile = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/auth/upload-image", {
+      const res = await fetch(`${apiURL}/auth/upload-image`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -87,7 +88,7 @@ const Profile = () => {
     if (!newPassword) return alert("⚠️ Enter a new password");
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/auth/change-password", {
+      const res = await fetch(`/${apiURL}auth/change-password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +112,7 @@ const Profile = () => {
   const handleProfileUpdate = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/auth/update-profile", {
+      const res = await fetch(`${apiURL}/auth/update-profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -305,7 +306,7 @@ const Profile = () => {
                 placeholder="New Password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               <button
                 onClick={handleChangePassword}

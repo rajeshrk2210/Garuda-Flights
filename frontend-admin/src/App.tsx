@@ -66,7 +66,6 @@ const App = () => {
               element={admin ? <EditFlight /> : <Navigate to="/login" />}
             />
 
-            {/* Catch-all route: redirect to /dashboard if logged in, /login if not */}
             <Route
               path="*"
               element={<Navigate to={admin ? "/dashboard" : "/login"} />}
