@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { formatTime } from "../utils/formatTime";
+import apiURL from "../config/config";
 
 // Define the Flight interface based on expected API response
 interface Flight {
@@ -37,7 +38,7 @@ const Flights = () => {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/routes/locations");
+        const res = await fetch(`${apiURL}/api/routes/locations`);
         const data = await res.json();
         setLocations(data);
       } catch (err) {
@@ -58,7 +59,7 @@ const Flights = () => {
 
     try {
       const query = `start=${startLocation}&end=${endLocation}&date=${departureDate}&class=${flightClass}`;
-      const res = await fetch(`http://localhost:5000/api/flights/search?${query}`, {
+      const res = await fetch(`${apiURL}/api/flights/search?${query}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -66,7 +67,7 @@ const Flights = () => {
 
       if (tripType === "roundtrip" && returnDate) {
         const returnQuery = `start=${endLocation}&end=${startLocation}&date=${returnDate}&class=${flightClass}`;
-        const returnRes = await fetch(`http://localhost:5000/api/flights/search?${returnQuery}`, {
+        const returnRes = await fetch(`${apiURL}/api/flights/search?${returnQuery}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const returnData = await returnRes.json();
