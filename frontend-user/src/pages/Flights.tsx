@@ -272,12 +272,12 @@ const Flights = () => {
                   key={flight._id}
                   className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:shadow-lg transition duration-300"
                 >
-                  <div className="flex items-center">
+                  <div className="flex justify-between items-center">
                     <div>
                       <p className="text-sm text-left text-gray-500">Aircraft No. {flight.aircraftNumber}</p>
 
                       <div className="flex items-center gap-4 mt-2">
-                        <div className="text-left">
+                        <div className="text-left min-w-[300px]">
                           <p className="text-lg font-semibold text-gray-800">
                             {startLocation}
                           </p>
@@ -286,7 +286,7 @@ const Flights = () => {
 
                         <div className="flex-1 border-t border-dashed border-gray-300"></div>
 
-                        <div className="text-left">
+                        <div className="text-left min-w-[300px]">
                           <p className="text-lg font-semibold text-gray-800">
                             {endLocation}
                           </p>
@@ -338,7 +338,7 @@ const Flights = () => {
                         </p>
 
                         <div className="flex items-center gap-4 mt-2">
-                          <div className="text-left">
+                          <div className="text-left min-w-[300px]">
                             <p className="text-lg font-semibold text-gray-800">
                               {endLocation}
                             </p>
@@ -349,7 +349,7 @@ const Flights = () => {
 
                           <div className="flex-1 border-t border-dashed border-gray-300"></div>
 
-                          <div className="text-left">
+                          <div className="text-left min-w-[300px]">
                             <p className="text-lg font-semibold text-gray-800">
                               {startLocation}
                             </p>
