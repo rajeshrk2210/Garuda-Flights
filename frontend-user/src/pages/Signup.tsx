@@ -90,7 +90,7 @@ const Signup = () => {
         <form onSubmit={handleSignup} className="space-y-8">
           {/* Basic Information */}
           <div>
-            <h3 className="text-lg font-semibold text-teal-700 mb-4">Basic Information</h3>
+            <h3 className="text-left text-lg font-semibold text-teal-700 mb-4">Basic Information</h3>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="userName" className="flex text-sm font-medium text-gray-700 mb-1">
@@ -156,7 +156,7 @@ const Signup = () => {
 
           {/* Contact Details */}
           <div>
-            <h3 className="text-lg font-semibold text-teal-700 mb-4">Contact Details</h3>
+            <h3 className="text-left text-lg font-semibold text-teal-700 mb-4">Contact Details</h3>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="email" className="flex text-sm font-medium text-gray-700 mb-1">
@@ -220,7 +220,7 @@ const Signup = () => {
 
           {/* Identity & Verification */}
           <div>
-            <h3 className="text-lg font-semibold text-teal-700 mb-4">Identity & Verification</h3>
+            <h3 className="text-left text-lg font-semibold text-teal-700 mb-4">Identity & Verification</h3>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="passportNumber" className="flex text-sm font-medium text-gray-700 mb-1">
@@ -255,7 +255,7 @@ const Signup = () => {
 
           {/* Security */}
           <div>
-            <h3 className="text-lg font-semibold text-teal-700 mb-4">Security</h3>
+            <h3 className="text-left text-lg font-semibold text-teal-700 mb-4">Security</h3>
             <div className="relative">
               <label htmlFor="password" className="flex text-sm font-medium text-gray-700 mb-1">
                 Password *

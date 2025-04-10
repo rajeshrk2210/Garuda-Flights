@@ -14,9 +14,9 @@ const Navbar = () => {
   return (
     <nav className="bg-gradient-to-r to-teal-700 from-cyan-600 text-white px-4 sm:px-6 lg:px-8 py-4 shadow-lg flex items-center justify-between sticky top-0 z-50">
       {/* Brand Logo */}
-      <Link to="/" className="text-2xl font-bold tracking-tight !text-white hover:text-teal-200 transition duration-200">
+      <div onClick={() => navigate("/")} className="cursor-pointer text-2xl font-bold tracking-tight !text-white hover:text-teal-200 transition duration-200">
         Garuda Flights
-      </Link>
+      </div>
 
       {/* Navigation Links */}
       <div className="flex items-center space-x-4 text-sm sm:text-base">
