@@ -2,6 +2,24 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+interface Flight {
+  _id: string;
+  aircraftNumber: string;
+  route?: {
+    startLocation: string;
+    endLocation: string;
+  };
+  departureDate: string;
+  departureTime: string;
+  arrivalDate: string;
+  arrivalTime: string;
+}
+
+interface SeatAssignment {
+  flight: string;
+  seatNumbers: string[];
+}
+
 interface Booking {
   _id: string;
   pnr: string;
@@ -9,11 +27,8 @@ interface Booking {
   seatClass: "Economy" | "Premium";
   price: number;
   createdAt: string;
-  flights: any[]; // populated from backend
-  seatAssignments: {
-    flight: string;
-    seatNumbers: string[];
-  }[];
+  flights: Flight[];
+  seatAssignments: SeatAssignment[];
 }
 
 const MyBookings = () => {
@@ -32,9 +47,7 @@ const MyBookings = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await fetch("http://localhost:5000/api/bookings/my-bookings", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const data = await res.json();
@@ -50,16 +63,13 @@ const MyBookings = () => {
   }, [user, navigate]);
 
   const handleCancel = async (bookingId: string) => {
-    const confirm = window.confirm("Are you sure you want to cancel this booking?");
-    if (!confirm) return;
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`http://localhost:5000/api/bookings/cancel/${bookingId}`, {
         method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
@@ -87,10 +97,7 @@ const MyBookings = () => {
       ) : (
         <div className="space-y-6">
           {bookings.map((booking) => (
-            <div
-              key={booking._id}
-              className="border rounded p-4 bg-white shadow"
-            >
+            <div key={booking._id} className="border rounded p-4 bg-white shadow">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-lg font-semibold">PNR: {booking.pnr}</p>
                 <span
@@ -106,22 +113,20 @@ const MyBookings = () => {
 
               <p><strong>Class:</strong> {booking.seatClass}</p>
               <p><strong>Total Price:</strong> ₹{booking.price}</p>
-              <p><strong>Booking Date:</strong> {new Date(booking.createdAt).toLocaleString()}</p>
+              <p><strong>Booking Date:</strong> {new Date(booking.createdAt).toLocaleString("en-US")}</p>
 
               <div className="mt-3">
                 <h4 className="font-semibold">Flights:</h4>
-                {booking.flights.map((flight, idx) => (
+                {booking.flights.map((flight) => (
                   <div key={flight._id} className="border p-3 mt-2 rounded bg-gray-50">
                     <p><strong>Aircraft No:</strong> {flight.aircraftNumber}</p>
-                    <p><strong>From:</strong> {flight.route?.startLocation}</p>
-                    <p><strong>To:</strong> {flight.route?.endLocation}</p>
+                    <p><strong>From:</strong> {flight.route?.startLocation || "N/A"}</p>
+                    <p><strong>To:</strong> {flight.route?.endLocation || "N/A"}</p>
                     <p><strong>Departure:</strong> {flight.departureDate} at {flight.departureTime}</p>
                     <p><strong>Arrival:</strong> {flight.arrivalDate} at {flight.arrivalTime}</p>
                     <p>
                       <strong>Seats:</strong>{" "}
-                      {
-                        booking.seatAssignments.find(a => a.flight === flight._id)?.seatNumbers.join(", ") || "N/A"
-                      }
+                      {booking.seatAssignments.find((a) => a.flight === flight._id)?.seatNumbers.join(", ") || "N/A"}
                     </p>
                   </div>
                 ))}

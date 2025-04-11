@@ -2,19 +2,17 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { Booking } from "../models/Booking";
 import { Flight } from "../models/Flight";
-import { JwtPayload } from "jsonwebtoken";
 
-/** Extend Express Request for JWT decoded user */
 interface AuthenticatedRequest extends Request {
-  user?: JwtPayload & { _id: string };
+  user?: { userId: string };
 }
 
 export const createBooking = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?._id;
+    const userId = req.user?.userId;
     const { flights, seatClass, passengers, contactDetails, price } = req.body;
 
-    if (!userId || !flights?.length || !seatClass || !passengers?.length || !contactDetails || !price) {
+    if (!userId || !flights?.length || !seatClass || !passengers?.length || !contactDetails || typeof price !== "number") {
       res.status(400).json({ message: "Missing booking details" });
       return;
     }
@@ -70,13 +68,25 @@ export const createBooking = async (req: AuthenticatedRequest, res: Response): P
 };
 
 
+
 /** ✅ Fetch all bookings for the logged-in user */
-export const getUserBookings = async (req: Request, res: Response): Promise<void> => {
+export const getUserBookings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = (req as any).user._id;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
 
     const bookings = await Booking.find({ user: userId })
-      .populate("flights")
+      .populate({
+        path: "flights",
+        populate: {
+          path: "route",
+          model: "Route"
+        }
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json(bookings);
@@ -85,6 +95,7 @@ export const getUserBookings = async (req: Request, res: Response): Promise<void
     res.status(500).json({ message: "Error fetching bookings" });
   }
 };
+
 
 /** ✅ Cancel a booking and return seats */
 type SeatClassKey = "economy" | "premium";

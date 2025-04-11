@@ -7,42 +7,35 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export interface AuthRequest extends Request {
-  user?: JwtPayload;
+  user?: { userId: string; email: string; role: string };
 }
 
-/** ✅ Middleware to Authenticate Users & Admins */
 export const authenticateUser = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const authHeader = req.headers["authorization"];
-
-    // ✅ Validate that header exists and starts with 'Bearer '
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       res.status(401).json({ message: "Unauthorized: No valid token provided." });
       return;
     }
 
     const token = authHeader.split(" ")[1];
-
-    // ✅ Check for invalid or malformed token values
     if (!token || token === "null" || token === "undefined") {
       res.status(401).json({ message: "Unauthorized: Invalid token." });
       return;
     }
 
-    // ✅ Verify token
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role: string };
 
-    req.user = decoded; // Attach user to request
-    next(); // ✅ Move to next middleware or controller
-  } catch (error: any) {
+    req.user = {
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+    };
+
+    next();
+  } catch (error) {
     console.error("❌ Token verification failed:", error);
-
-    if (error.name === "TokenExpiredError") {
-      res.status(401).json({ message: "Token expired. Please log in again." });
-      return;
-    }
-
-    res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ message: "Invalid or expired token" });
   }
 };
 
