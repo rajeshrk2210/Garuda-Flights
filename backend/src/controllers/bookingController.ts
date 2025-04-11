@@ -103,9 +103,9 @@ type SeatClassKey = "economy" | "premium";
 export const cancelBooking = async (req: Request, res: Response): Promise<void> => {
   try {
     const bookingId = req.params.id;
-    const userId = (req as any).user._id;
+    const userId = (req as any).user.userId; // ✅ FIXED
 
-    const booking = await Booking.findOne({ _id: bookingId, user: userId });
+    const booking = await Booking.findOne({ _id: bookingId, user: userId }); // ✅ Uses userId
 
     if (!booking) {
       res.status(404).json({ message: "Booking not found or unauthorized" });
@@ -120,7 +120,7 @@ export const cancelBooking = async (req: Request, res: Response): Promise<void> 
     booking.status = "CANCELLED";
     await booking.save();
 
-    const classKey = booking.seatClass.toLowerCase() as SeatClassKey;
+    const classKey = booking.seatClass.toLowerCase() as "economy" | "premium";
 
     for (const assignment of booking.seatAssignments) {
       const flight = await Flight.findById(assignment.flight);
@@ -128,11 +128,9 @@ export const cancelBooking = async (req: Request, res: Response): Promise<void> 
 
       const seatNumbers = assignment.seatNumbers.map(Number);
 
-      // Ensure arrays exist
       flight.availableSeats[classKey] = flight.availableSeats[classKey] || [];
       flight.bookedSeats[classKey] = flight.bookedSeats[classKey] || [];
 
-      // Restore seats
       flight.availableSeats[classKey].push(...seatNumbers);
       flight.availableSeats[classKey].sort((a, b) => a - b);
 
@@ -149,4 +147,5 @@ export const cancelBooking = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
