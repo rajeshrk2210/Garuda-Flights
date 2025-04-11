@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes";
 import flightRoutes from "./routes/flightRoutes";
 import routeRoutes from "./routes/routeRoutes";
 import aircraftRoutes from "./routes/aircraftRoutes";
+import bookingRoutes from "./routes/bookingRoutes";
 
 dotenv.config(); // ✅ Load environment variables
 const app = express();
@@ -43,6 +44,7 @@ app.use("/api/aircrafts", aircraftRoutes);
 app.use("/auth", authRoutes);
 app.use("/api/flights", flightRoutes);
 app.use("/api/routes", routeRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // ✅ Test route
 app.get("/", (req: Request, res: Response) => {

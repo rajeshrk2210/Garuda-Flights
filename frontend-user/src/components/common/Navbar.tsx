@@ -14,7 +14,10 @@ const Navbar = () => {
   return (
     <nav className="bg-gradient-to-r to-teal-700 from-cyan-600 text-white px-4 sm:px-6 lg:px-8 py-4 shadow-lg flex items-center justify-between sticky top-0 z-50">
       {/* Brand Logo */}
-      <div onClick={() => navigate("/")} className="cursor-pointer text-2xl font-bold tracking-tight !text-white hover:text-teal-200 transition duration-200">
+      <div
+        onClick={() => navigate("/")}
+        className="cursor-pointer text-2xl font-bold tracking-tight !text-white hover:text-teal-200 transition duration-200"
+      >
         Garuda Flights
       </div>
 
@@ -33,15 +36,22 @@ const Navbar = () => {
           Flights
         </Link>
 
+        {user && (
+          <Link
+            to="/bookings"
+            className="!text-white hover:text-teal-200 focus:text-teal-200 transition duration-200 rounded px-4 py-2 hover:bg-teal-600"
+          >
+            My Bookings
+          </Link>
+        )}
+
         {!user ? (
-          <>
-            <Link
-              to="/login"
-              className="px-4 py-2 hover:bg-teal-600 focus:bg-teal-700 !text-white transition duration-200 rounded"
-            >
-              Login
-            </Link>
-          </>
+          <Link
+            to="/login"
+            className="px-4 py-2 hover:bg-teal-600 focus:bg-teal-700 !text-white transition duration-200 rounded"
+          >
+            Login
+          </Link>
         ) : (
           <>
             <Link

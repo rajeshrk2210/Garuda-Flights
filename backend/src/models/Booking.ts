@@ -1,10 +1,14 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IBooking extends Document {
-  user: string;
-  flight: string;
+  user: mongoose.Types.ObjectId;
+  flights: string[]; // One or two flight IDs
+  pnr: string;
   seatClass: "Economy" | "Premium";
-  seatNumbers: string[];
+  seatAssignments: {
+    flight: string;        // Flight ID
+    seatNumbers: string[]; // Seat numbers for this flight
+  }[];
   passengers: {
     firstName: string;
     lastName: string;
@@ -18,14 +22,21 @@ export interface IBooking extends Document {
     email: string;
   };
   price: number;
+  status: "CONFIRMED" | "CANCELLED";
 }
 
 const BookingSchema = new Schema<IBooking>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true } as any,
-    flight: { type: Schema.Types.ObjectId as any, ref: "Flight", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    flights: [{ type: Schema.Types.ObjectId, ref: "Flight", required: true }],
+    pnr: { type: String, required: true, unique: true },
     seatClass: { type: String, enum: ["Economy", "Premium"], required: true },
-    seatNumbers: [String],
+    seatAssignments: [
+      {
+        flight: { type: Schema.Types.ObjectId, ref: "Flight", required: true },
+        seatNumbers: [{ type: String }],
+      },
+    ],
     passengers: [
       {
         firstName: String,
@@ -40,9 +51,15 @@ const BookingSchema = new Schema<IBooking>(
       mobile: String,
       email: String,
     },
-    price: Number,
+    price: { type: Number, required: true },
+    status: {
+      type: String,
+      enum: ["CONFIRMED", "CANCELLED"],
+      default: "CONFIRMED",
+    },
   },
   { timestamps: true }
 );
 
 export const Booking = mongoose.model<IBooking>("Booking", BookingSchema);
+export default Booking;

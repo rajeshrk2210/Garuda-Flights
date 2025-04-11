@@ -5,8 +5,7 @@ import { IAircraft } from "./Aircraft";
 
 export interface IFlight extends Document {
   route: IRoute["_id"];
-  aircraftNumber: string; // ✅ Use this instead of `aircraft: IAircraft["_id"]`
-  // Remove aircraft if not using ref
+  aircraftNumber: string;
   departureDate: string;
   departureTime: string;
   arrivalDate: string;
@@ -14,7 +13,16 @@ export interface IFlight extends Document {
   economyPrice: number;
   premiumPrice: number;
   status: "OK" | "CANCELLED" | "DELAYED";
+  availableSeats: {
+    economy: number[];
+    premium: number[];
+  };
+  bookedSeats: {
+    economy: number[];
+    premium: number[];
+  };
 }
+
 
 const FlightSchema: Schema = new Schema({
   route: { type: Schema.Types.ObjectId, ref: "Route", required: true },

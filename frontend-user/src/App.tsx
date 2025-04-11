@@ -11,6 +11,10 @@ import PassengerInfo from "./pages/PassengerInfo";
 import ReviewBooking from "./pages/ReviewBooking";
 import Payment from "./pages/Payment";
 import Confirmation from "./pages/Confirmation";
+import MyBookings from "./pages/MyBookings";
+
+
+
 
 function App() {
   return (
@@ -29,6 +33,7 @@ function App() {
             <Route path="/review-booking" element={<ReviewBooking />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/confirmation" element={<Confirmation />} />
+            <Route path="/bookings" element={<MyBookings />} />
           </Routes>
         </main>
         <Footer />
