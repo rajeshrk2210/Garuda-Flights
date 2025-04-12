@@ -59,17 +59,19 @@ const Confirmation = () => {
     passengers,
   } = booking;
 
-  const totalPrice =
-    (selectedOutbound?.price || 0) + (tripType === "roundtrip" ? selectedInbound?.price || 0 : 0);
+  const passengerCount = passengerData.passengers.length;
 
-    const formatCAD = (amount: number) => {
-      return new Intl.NumberFormat("en-CA", {
-        style: "currency",
-        currency: "CAD",
-        minimumFractionDigits: 2,
-      }).format(amount);
-    };
-    
+  const totalPrice =
+    ((selectedOutbound?.price || 0) + (tripType === "roundtrip" ? selectedInbound?.price || 0 : 0)) * passengerCount;
+
+  const formatCAD = (amount: number) => {
+    return new Intl.NumberFormat("en-CA", {
+      style: "currency",
+      currency: "CAD",
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
 
   return (
     <div className="max-w-3xl mx-auto p-6 my-10 bg-white rounded-xl shadow-sm border border-gray-200 text-center">
@@ -129,8 +131,9 @@ const Confirmation = () => {
 
       {/* Price Summary */}
       <div className="text-xl font-semibold mb-8 text-right text-gray-800">
-        <p>Total Passengers: {passengers}</p>
-        <p>Total Amount Paid: {formatCAD(totalPrice)}</p>
+      <p>Total Passengers: {passengerCount}</p>
+<p>Total Amount Paid: {formatCAD(totalPrice)}</p>
+
       </div>
 
       {/* Button */}

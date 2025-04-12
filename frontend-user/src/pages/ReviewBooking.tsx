@@ -46,18 +46,20 @@ const ReviewBooking = () => {
     to,
   } = booking;
 
-  const totalPrice =
-    (selectedOutbound?.price || 0) +
-    (tripType === "roundtrip" ? selectedInbound?.price || 0 : 0);
+  const passengerCount = passengerData.passengers.length;
 
-    const formatCAD = (amount: number) => {
-      return new Intl.NumberFormat("en-CA", {
-        style: "currency",
-        currency: "CAD",
-        minimumFractionDigits: 2,
-      }).format(amount);
-    };
-        
+  const totalPrice =
+    ((selectedOutbound?.price || 0) +
+      (tripType === "roundtrip" ? selectedInbound?.price || 0 : 0)) * passengerCount;
+
+  const formatCAD = (amount: number) => {
+    return new Intl.NumberFormat("en-CA", {
+      style: "currency",
+      currency: "CAD",
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-200 my-10">
@@ -113,7 +115,7 @@ const ReviewBooking = () => {
 
       {/* Summary */}
       <div className="mb-8 text-right text-lg font-semibold text-gray-800">
-        <p>Total Passengers: {passengers}</p>
+        <p>Total Passengers: {passengerCount}</p>
         <p>Total Price: {formatCAD(totalPrice)}</p>
       </div>
 

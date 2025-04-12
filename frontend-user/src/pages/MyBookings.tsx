@@ -85,11 +85,11 @@ const MyBookings = () => {
     doc.text(`PNR: ${booking.pnr}`, 14, 30);
     doc.text(`Status: ${booking.status}`, 14, 36);
     doc.text(`Class: ${booking.seatClass}`, 14, 42);
-    doc.text(`Price: ₹${booking.price}`, 14, 48);
+    doc.text(`Price: CAD ${booking.price}`, 14, 48);
 
     autoTable(doc, {
       startY: 55,
-      head: [["Flight", "From", "To", "Departure", "Arrival", "Seats"]],
+      head: [["Flight", "From", "To", "Departure", "Arrival", "Seat Numbers"]],
       body: booking.flights.map((flight) => {
         const seats = booking.seatAssignments.find((a) => a.flight === flight._id)?.seatNumbers.join(", ") || "N/A";
         return [
@@ -190,7 +190,7 @@ const MyBookings = () => {
                         <p><strong>To:</strong> {flight.route?.endLocation}</p>
                         <p><strong>Departure:</strong> {flight.departureDate} at {flight.departureTime}</p>
                         <p><strong>Arrival:</strong> {flight.arrivalDate} at {flight.arrivalTime}</p>
-                        <p><strong>Seats:</strong> {seats}</p>
+                        <p><strong>Seat Numbers:</strong> {seats}</p>
                       </div>
                     );
                   })}
