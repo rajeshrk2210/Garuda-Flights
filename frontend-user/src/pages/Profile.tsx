@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import apiURL from "../config/config";
 
+// Define a type for the profile data
 interface ProfileData {
   userName?: string;
   dateOfBirth?: string;
@@ -87,7 +88,7 @@ const Profile = () => {
     if (!newPassword) return alert("⚠️ Enter a new password");
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${apiURL}/auth/change-password`, {
+      const res = await fetch(`/${apiURL}auth/change-password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -131,8 +132,15 @@ const Profile = () => {
     }
   };
 
-  if (loading) return <SkeletonLoader />;
-  if (!profile) return <div className="p-6 text-gray-600">Failed to load profile.</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 py-8 px-6">
+        <SkeletonLoader />
+      </div>
+    );
+  }
+
+  if (!profile) return <div className="p-6 text-gray-600">Loading profile...</div>;
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-6">
@@ -140,6 +148,7 @@ const Profile = () => {
         <h1 className="text-3xl font-bold text-teal-700 mb-8 text-center">User Profile</h1>
 
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          {/* Profile Image */}
           {profile.userImage && (
             <div className="flex justify-center mb-6">
               <img
@@ -150,47 +159,125 @@ const Profile = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-4">
-            {[
-              ["Full Name", "userName"],
-              ["Date of Birth", "dateOfBirth"],
-              ["Gender", "gender"],
-              ["Nationality", "nationality"],
-              ["Phone Number", "phoneNumber"],
-              ["Alternate Phone", "alternatePhoneNumber"],
-              ["Mailing Address", "mailingAddress"],
-              ["Passport Number", "passportNumber"],
-              ["Emergency Contact", "emergencyContactDetails"],
-            ].map(([label, key]) => (
-              <div key={key}>
-                <label className="text-sm font-medium text-gray-600">{label}</label>
-                <input
-                  type={key === "dateOfBirth" ? "date" : "text"}
-                  className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  value={profile[key as keyof ProfileData] || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, [key]: e.target.value })
-                  }
-                />
-              </div>
-            ))}
+          {/* Profile Form */}
+          <div className="grid grid-cols-1 gap-4 text-left">
+            <div>
+              <label className="text-sm font-medium text-gray-600">Full Name</label>
+              <input
+                type="text"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Full Name"
+                value={profile.userName || ""}
+                onChange={(e) => setProfile({ ...profile, userName: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">Date of Birth</label>
+              <input
+                type="date"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                value={profile.dateOfBirth || ""}
+                onChange={(e) => setProfile({ ...profile, dateOfBirth: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">Gender</label>
+              <select
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                value={profile.gender || ""}
+                onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">Nationality</label>
+              <input
+                type="text"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Nationality"
+                value={profile.nationality || ""}
+                onChange={(e) => setProfile({ ...profile, nationality: e.target.value })}
+              />
+            </div>
 
             <div>
               <label className="text-sm font-medium text-gray-600">Email</label>
               <input
                 type="email"
-                className="w-full mt-1 p-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600"
                 value={profile.email || ""}
                 disabled
               />
             </div>
 
-            {/* Upload Image */}
             <div>
+              <label className="text-sm font-medium text-gray-600">Phone Number</label>
+              <input
+                type="text"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Phone Number"
+                value={profile.phoneNumber || ""}
+                onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">Alternate Phone</label>
+              <input
+                type="text"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Alternate Phone"
+                value={profile.alternatePhoneNumber || ""}
+                onChange={(e) => setProfile({ ...profile, alternatePhoneNumber: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">Mailing Address</label>
+              <input
+                type="text"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Mailing Address"
+                value={profile.mailingAddress || ""}
+                onChange={(e) => setProfile({ ...profile, mailingAddress: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">Passport Number</label>
+              <input
+                type="text"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Passport Number"
+                value={profile.passportNumber || ""}
+                onChange={(e) => setProfile({ ...profile, passportNumber: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">Emergency Contact</label>
+              <input
+                type="text"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Emergency Contact"
+                value={profile.emergencyContactDetails || ""}
+                onChange={(e) => setProfile({ ...profile, emergencyContactDetails: e.target.value })}
+              />
+            </div>
+
+            {/* Image Upload */}
+            <div className="mt-4">
               <label className="text-sm font-medium text-gray-600">Profile Image</label>
               <input
                 type="file"
-                className="w-full mt-1 p-2"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg"
                 onChange={(e) => setUserImage(e.target.files?.[0] || null)}
               />
               <button
@@ -235,8 +322,43 @@ const Profile = () => {
   );
 };
 
+// 🔹 Skeleton Loader Component
 const SkeletonLoader = () => (
-  <div className="p-6 text-gray-600">Loading profile...</div>
+  <div className="max-w-2xl mx-auto">
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 animate-pulse">
+      {/* Image Placeholder */}
+      <div className="flex justify-center mb-6">
+        <div className="w-32 h-32 rounded-full bg-gray-200"></div>
+      </div>
+
+      {/* Form Fields Placeholder */}
+      <div className="grid grid-cols-1 gap-4">
+        {Array.from({ length: 10 }).map((_, index) => (
+          <div key={index}>
+            <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+        {/* Image Upload Placeholder */}
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+        {/* Save Button Placeholder */}
+        <div className="h-10 bg-gray-200 rounded"></div>
+      </div>
+
+      {/* Change Password Placeholder */}
+      <div className="mt-8">
+        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="h-10 bg-gray-200 rounded flex-1"></div>
+          <div className="h-10 bg-gray-200 rounded w-40"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 );
 
 export default Profile;

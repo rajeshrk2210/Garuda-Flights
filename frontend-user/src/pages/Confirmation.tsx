@@ -62,6 +62,15 @@ const Confirmation = () => {
   const totalPrice =
     (selectedOutbound?.price || 0) + (tripType === "roundtrip" ? selectedInbound?.price || 0 : 0);
 
+    const formatCAD = (amount: number) => {
+      return new Intl.NumberFormat("en-CA", {
+        style: "currency",
+        currency: "CAD",
+        minimumFractionDigits: 2,
+      }).format(amount);
+    };
+    
+
   return (
     <div className="max-w-3xl mx-auto p-6 my-10 bg-white rounded-xl shadow-sm border border-gray-200 text-center">
       <h2 className="text-2xl font-semibold text-teal-700 mb-4">🎉 Booking Confirmed!</h2>
@@ -86,7 +95,7 @@ const Confirmation = () => {
           <p><strong>Arrival:</strong> {formatDate(selectedOutbound.arrivalDate)} at {selectedOutbound.arrivalTime}</p>
           <p><strong>Duration:</strong> {selectedOutbound.duration}</p>
           <p><strong>Class:</strong> {flightClass}</p>
-          <p><strong>Price:</strong> ₹{selectedOutbound.price}</p>
+          <p><strong>Price:</strong> {formatCAD(selectedOutbound.price)}</p>
         </div>
       </div>
 
@@ -101,7 +110,7 @@ const Confirmation = () => {
             <p><strong>Arrival:</strong> {formatDate(selectedInbound.arrivalDate)} at {selectedInbound.arrivalTime}</p>
             <p><strong>Duration:</strong> {selectedInbound.duration}</p>
             <p><strong>Class:</strong> {flightClass}</p>
-            <p><strong>Price:</strong> ₹{selectedInbound.price}</p>
+            <p><strong>Price:</strong> {formatCAD(selectedInbound.price)}</p>
           </div>
         </div>
       )}
@@ -121,7 +130,7 @@ const Confirmation = () => {
       {/* Price Summary */}
       <div className="text-xl font-semibold mb-8 text-right text-gray-800">
         <p>Total Passengers: {passengers}</p>
-        <p>Total Amount Paid: ₹{totalPrice}</p>
+        <p>Total Amount Paid: {formatCAD(totalPrice)}</p>
       </div>
 
       {/* Button */}

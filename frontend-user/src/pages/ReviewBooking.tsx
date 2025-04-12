@@ -50,6 +50,15 @@ const ReviewBooking = () => {
     (selectedOutbound?.price || 0) +
     (tripType === "roundtrip" ? selectedInbound?.price || 0 : 0);
 
+    const formatCAD = (amount: number) => {
+      return new Intl.NumberFormat("en-CA", {
+        style: "currency",
+        currency: "CAD",
+        minimumFractionDigits: 2,
+      }).format(amount);
+    };
+        
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-200 my-10">
       <h2 className="text-2xl font-semibold text-teal-700 mb-8 text-center">📋 Review Your Booking</h2>
@@ -67,7 +76,7 @@ const ReviewBooking = () => {
             <p><span className="font-medium">Arrival Time:</span> {formatTime(selectedOutbound.arrivalTime)}</p>
             <p><span className="font-medium">Duration:</span> {selectedOutbound.duration} Hrs</p>
             <p><span className="font-medium">Class:</span> {flightClass}</p>
-            <p><span className="font-medium">Price:</span> ₹{selectedOutbound.price}</p>
+            <p><span className="font-medium">Price:</span> {formatCAD(selectedOutbound.price)}</p>
           </div>
         </div>
       )}
@@ -85,7 +94,7 @@ const ReviewBooking = () => {
             <p><span className="font-medium">Arrival Time:</span> {formatTime(selectedInbound.arrivalTime)}</p>
             <p><span className="font-medium">Duration:</span> {selectedInbound.duration} Hrs</p>
             <p><span className="font-medium">Class:</span> {flightClass}</p>
-            <p><span className="font-medium">Price:</span> ₹{selectedInbound.price}</p>
+            <p><span className="font-medium">Price:</span> {formatCAD(selectedInbound.price)}</p>
           </div>
         </div>
       )}
@@ -105,7 +114,7 @@ const ReviewBooking = () => {
       {/* Summary */}
       <div className="mb-8 text-right text-lg font-semibold text-gray-800">
         <p>Total Passengers: {passengers}</p>
-        <p>Total Price: ₹{totalPrice}</p>
+        <p>Total Price: {formatCAD(totalPrice)}</p>
       </div>
 
       <div className="text-center">
