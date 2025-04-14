@@ -131,8 +131,8 @@ const Confirmation = () => {
 
       {/* Price Summary */}
       <div className="text-xl font-semibold mb-8 text-right text-gray-800">
-      <p>Total Passengers: {passengerCount}</p>
-<p>Total Amount Paid: {formatCAD(totalPrice)}</p>
+        <p>Total Passengers: {passengerCount}</p>
+        <p>Total Amount Paid: {formatCAD(totalPrice)}</p>
 
       </div>
 

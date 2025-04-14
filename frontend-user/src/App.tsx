@@ -14,8 +14,6 @@ import Confirmation from "./pages/Confirmation";
 import MyBookings from "./pages/MyBookings";
 
 
-
-
 function App() {
   return (
     <Router>
