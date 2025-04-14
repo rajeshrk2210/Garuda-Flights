@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import apiURL from "../../config/config";
 
 // Interfaces
 interface Aircraft {
@@ -38,7 +39,6 @@ const formatDate = (dateStr: string): string => {
   });
 };
 
-
 /** 🔹 Convert Time to 12-hour Format */
 const formatTime = (timeStr: string): string => {
   const [hours, minutes] = timeStr.split(":").map(Number);
@@ -56,19 +56,16 @@ const calculateArrivalDetails = (departureDate: string, departureTime: string, r
   const [durationHours, durationMinutes] = routeDuration.split(":").map(Number);
 
   const depDateTime = new Date(year, month - 1, day, depHours, depMinutes);
-
   const durationInMs = (durationHours * 60 + durationMinutes) * 60 * 1000;
   const arrivalDateTime = new Date(depDateTime.getTime() + durationInMs);
 
   return {
-    arrivalDate: arrivalDateTime.toISOString().split("T")[0], // ✅ Safer and consistent YYYY-MM-DD
-    arrivalTime: arrivalDateTime.toTimeString().slice(0, 5),   // HH:MM format
+    arrivalDate: arrivalDateTime.toISOString().split("T")[0], // YYYY-MM-DD
+    arrivalTime: arrivalDateTime.toTimeString().slice(0, 5),   // HH:MM
   };
 };
 
-
 const FlightManagement = () => {
-  // Inside FlightManagement component
   const navigate = useNavigate();
 
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
@@ -102,7 +99,7 @@ const FlightManagement = () => {
   /** 🔹 Fetch Aircrafts */
   const fetchAircrafts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/aircrafts");
+      const response = await fetch(`${apiURL}/api/aircrafts`);
       const data = await response.json();
       setAircrafts(data);
     } catch (error) {
@@ -113,7 +110,7 @@ const FlightManagement = () => {
   /** 🔹 Fetch Routes */
   const fetchRoutes = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/routes");
+      const response = await fetch(`${apiURL}/api/routes`);
       const data = await response.json();
       setRoutes(data);
     } catch (error) {
@@ -136,14 +133,13 @@ const FlightManagement = () => {
       if (searchParams.endLocation) queryParams.append("endLocation", searchParams.endLocation);
       if (searchParams.type !== "All") queryParams.append("type", searchParams.type);
 
-      const response = await fetch(`http://localhost:5000/api/flights?${queryParams.toString()}`, {
+      const response = await fetch(`${apiURL}/api/flights?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       console.log("🔐 Token used in request:", token);
 
       let data: Flight[] = await response.json();
-
       setFlights(data);
     } catch (error) {
       console.error("❌ Error fetching flights:", error);
@@ -153,12 +149,35 @@ const FlightManagement = () => {
   /** 🔹 Handle Input Changes */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewFlight((prev) => ({ ...prev, [name]: value }));
+    setNewFlight((prev) => {
+      const updatedFlight = { ...prev, [name]: value };
+
+      // If routeId, departureDate, or departureTime changes, recalculate arrival
+      if (name === "routeId" || name === "departureDate" || name === "departureTime") {
+        const selectedRoute = routes.find((route) => route._id === updatedFlight.routeId);
+        if (selectedRoute && updatedFlight.departureDate && updatedFlight.departureTime) {
+          const { arrivalDate, arrivalTime } = calculateArrivalDetails(
+            updatedFlight.departureDate,
+            updatedFlight.departureTime,
+            selectedRoute.duration
+          );
+          return { ...updatedFlight, arrivalDate, arrivalTime };
+        }
+      }
+      return updatedFlight;
+    });
   };
 
   /** 🔹 Add Flight */
   const addFlight = async () => {
-    if (!newFlight.aircraftNumber || !newFlight.routeId || !newFlight.departureDate || !newFlight.departureTime) {
+    if (
+      !newFlight.aircraftNumber ||
+      !newFlight.routeId ||
+      !newFlight.departureDate ||
+      !newFlight.departureTime ||
+      !newFlight.economyPrice ||
+      !newFlight.premiumPrice
+    ) {
       alert("⚠️ All fields are required!");
       return;
     }
@@ -170,7 +189,7 @@ const FlightManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/flights", {
+      const response = await fetch(`${apiURL}/api/flights`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -204,135 +223,209 @@ const FlightManagement = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow-lg mb-8">
-      <h3 className="text-2xl font-bold mb-6 text-blue-700">✈️ Flight Management</h3>
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+      <h3 className="text-2xl font-semibold text-teal-700 mb-6">✈️ Flight Management</h3>
 
       {/* Add Flight Section */}
-      <div className="mb-6 p-4 border rounded bg-gray-100">
-        <h4 className="text-lg font-semibold mb-4 text-gray-700">➕ Add Flight</h4>
+      <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">➕ Add Flight</h4>
 
-        <label className="block mb-1 text-sm text-gray-700">Aircraft</label>
-        <select name="aircraftNumber" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.aircraftNumber} onChange={handleInputChange}>
-          <option value="">Select Aircraft</option>
-          {aircrafts.map((aircraft) => (
-            <option key={aircraft.aircraftNumber} value={aircraft.aircraftNumber}>{aircraft.aircraftNumber}</option>
-          ))}
-        </select>
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Aircraft</label>
+          <select
+            name="aircraftNumber"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={newFlight.aircraftNumber}
+            onChange={handleInputChange}
+          >
+            <option value="">Select Aircraft</option>
+            {aircrafts.map((aircraft) => (
+              <option key={aircraft.aircraftNumber} value={aircraft.aircraftNumber}>
+                {aircraft.aircraftNumber}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <label className="block mb-1 text-sm text-gray-700">Route</label>
-        <select name="routeId" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.routeId} onChange={handleInputChange}>
-          <option value="">Select Route</option>
-          {routes.map((route) => (
-            <option key={route._id} value={route._id}>{route.startLocation} → {route.endLocation}</option>
-          ))}
-        </select>
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Route</label>
+          <select
+            name="routeId"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={newFlight.routeId}
+            onChange={handleInputChange}
+          >
+            <option value="">Select Route</option>
+            {routes.map((route) => (
+              <option key={route._id} value={route._id}>
+                {route.startLocation} → {route.endLocation}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <label className="block mb-1 text-sm text-gray-700">Departure Date</label>
-        <input type="date" name="departureDate" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.departureDate} onChange={handleInputChange} />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Departure Date</label>
+          <input
+            type="date"
+            name="departureDate"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={newFlight.departureDate}
+            onChange={handleInputChange}
+          />
+        </div>
 
-        <label className="block mb-1 text-sm text-gray-700">Departure Time</label>
-        <input type="time" name="departureTime" className="border p-2 w-full rounded mb-3 bg-white text-gray-800" value={newFlight.departureTime} onChange={handleInputChange} />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Departure Time</label>
+          <input
+            type="time"
+            name="departureTime"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={newFlight.departureTime}
+            onChange={handleInputChange}
+          />
+        </div>
 
-        <label className="block mb-1 text-sm text-gray-700">Economy Price</label>
-        <input type="text" name="economyPrice" placeholder="e.g. 100" className="border p-2 w-full rounded mb-3 bg-white placeholder-gray-500 text-gray-800" value={newFlight.economyPrice} onChange={handleInputChange} />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Economy Price ($)</label>
+          <input
+            type="text"
+            name="economyPrice"
+            placeholder="e.g., 100"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={newFlight.economyPrice}
+            onChange={handleInputChange}
+          />
+        </div>
 
-        <label className="block mb-1 text-sm text-gray-700">Premium Price</label>
-        <input type="text" name="premiumPrice" placeholder="e.g. 200" className="border p-2 w-full rounded mb-4 bg-white placeholder-gray-500 text-gray-800" value={newFlight.premiumPrice} onChange={handleInputChange} />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Premium Price ($)</label>
+          <input
+            type="text"
+            name="premiumPrice"
+            placeholder="e.g., 200"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={newFlight.premiumPrice}
+            onChange={handleInputChange}
+          />
+        </div>
 
-        <button onClick={addFlight} className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition">
+        <button
+          onClick={addFlight}
+          className="w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition duration-200"
+        >
           Add Flight
         </button>
       </div>
 
       {/* Search Flights Section */}
-      <div className="mb-6 p-4 border rounded bg-gray-100">
-        <h4 className="text-lg font-semibold mb-4 text-gray-700">🔍 Search Flights</h4>
+      <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">🔍 Search Flights</h4>
 
-        <input
-          type="text"
-          placeholder="Aircraft Number"
-          className="border p-2 w-full rounded mb-3 bg-white placeholder-gray-500 text-gray-800"
-          value={searchParams.aircraftNumber}
-          onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })}
-        />
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Aircraft Number</label>
+          <input
+            type="text"
+            placeholder="Aircraft Number"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={searchParams.aircraftNumber}
+            onChange={(e) => setSearchParams({ ...searchParams, aircraftNumber: e.target.value })}
+          />
+        </div>
 
-        <select
-          className="border p-2 w-full rounded mb-3 bg-white text-gray-800"
-          value={searchParams.startLocation}
-          onChange={(e) => setSearchParams({ ...searchParams, startLocation: e.target.value })}
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Start Airport</label>
+          <select
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={searchParams.startLocation}
+            onChange={(e) => setSearchParams({ ...searchParams, startLocation: e.target.value })}
+          >
+            <option value="">Select Start Airport</option>
+            {routes.map((route) => (
+              <option key={route._id} value={route.startLocation}>
+                {route.startLocation}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">End Airport</label>
+          <select
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={searchParams.endLocation}
+            onChange={(e) => setSearchParams({ ...searchParams, endLocation: e.target.value })}
+          >
+            <option value="">Select End Airport</option>
+            {routes.map((route) => (
+              <option key={route._id} value={route.endLocation}>
+                {route.endLocation}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Flight Type</label>
+          <select
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={searchParams.type}
+            onChange={(e) => setSearchParams({ ...searchParams, type: e.target.value })}
+          >
+            <option value="All">All Flights</option>
+            <option value="Upcoming">Upcoming Flights</option>
+            <option value="Previous">Previous Flights</option>
+          </select>
+        </div>
+
+        <button
+          onClick={fetchFlights}
+          className="w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition duration-200"
         >
-          <option value="">Select Start Location</option>
-          {routes.map((route) => (
-            <option key={route._id} value={route.startLocation}>{route.startLocation}</option>
-          ))}
-        </select>
-
-        <select
-          className="border p-2 w-full rounded mb-3 bg-white text-gray-800"
-          value={searchParams.endLocation}
-          onChange={(e) => setSearchParams({ ...searchParams, endLocation: e.target.value })}
-        >
-          <option value="">Select End Location</option>
-          {routes.map((route) => (
-            <option key={route._id} value={route.endLocation}>{route.endLocation}</option>
-          ))}
-        </select>
-
-        <select
-          className="border p-2 w-full rounded mb-4 bg-white text-gray-800"
-          value={searchParams.type}
-          onChange={(e) => setSearchParams({ ...searchParams, type: e.target.value })}
-        >
-          <option value="All">All Flights</option>
-          <option value="Upcoming">Upcoming Flights</option>
-          <option value="Previous">Previous Flights</option>
-        </select>
-
-        <button onClick={fetchFlights} className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">
           Search Flights
         </button>
       </div>
 
       {/* Display Flights */}
-      <div className="mb-6 p-4 border rounded bg-gray-100">
-        <h4 className="text-lg font-semibold mb-4 text-gray-700">🛫 Flight Results</h4>
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">🛫 Flight Results</h4>
 
         {flights.length === 0 ? (
           <p className="text-gray-600">No flights found.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border border-gray-300">
-              <thead className="bg-blue-100 text-blue-700">
+            <table className="w-full text-left border border-gray-200">
+              <thead className="bg-teal-600 text-white">
                 <tr>
-                  <th className="p-3 border">Aircraft</th>
-                  <th className="p-3 border">Start Location</th>
-                  <th className="p-3 border">End Location</th>
-                  <th className="p-3 border">Departure Date</th>
-                  <th className="p-3 border">Departure Time</th>
-                  <th className="p-3 border">Arrival Date</th>
-                  <th className="p-3 border">Arrival Time</th>
-                  <th className="p-3 border">Economy Price</th>
-                  <th className="p-3 border">Premium Price</th>
-                  <th className="p-3 border">Status</th>
-                  <th className="p-3 border">Actions</th>
+                  <th className="p-3 border-b">Aircraft</th>
+                  <th className="p-3 border-b">Start Airport</th>
+                  <th className="p-3 border-b">End Airport</th>
+                  <th className="p-3 border-b">Departure Date</th>
+                  <th className="p-3 border-b">Departure Time</th>
+                  <th className="p-3 border-b">Arrival Date</th>
+                  <th className="p-3 border-b">Arrival Time</th>
+                  <th className="p-3 border-b">Economy Price</th>
+                  <th className="p-3 border-b">Premium Price</th>
+                  <th className="p-3 border-b">Status</th>
+                  <th className="p-3 border-b">Actions</th>
                 </tr>
               </thead>
               <tbody className="text-gray-800">
                 {flights.map((flight) => (
-                  <tr key={flight._id} className="hover:bg-gray-50">
-                    <td className="p-3 border">{flight.aircraftNumber}</td>
-                    <td className="p-3 border">{flight.route?.startLocation || "N/A"}</td>
-                    <td className="p-3 border">{flight.route?.endLocation || "N/A"}</td>
-                    <td className="p-3 border">{formatDate(flight.departureDate)}</td>
-                    <td className="p-3 border">{formatTime(flight.departureTime)}</td>
-                    <td className="p-3 border">{formatDate(flight.arrivalDate)}</td>
-                    <td className="p-3 border">{formatTime(flight.arrivalTime)}</td>
-                    <td className="p-3 border">${flight.economyPrice}</td>
-                    <td className="p-3 border">${flight.premiumPrice}</td>
-                    <td className="p-3 border">{flight.status}</td>
-                    <td className="p-3 border">
+                  <tr key={flight._id} className="hover:bg-teal-50">
+                    <td className="p-3 border-b">{flight.aircraftNumber}</td>
+                    <td className="p-3 border-b">{flight.route?.startLocation || "N/A"}</td>
+                    <td className="p-3 border-b">{flight.route?.endLocation || "N/A"}</td>
+                    <td className="p-3 border-b">{formatDate(flight.departureDate)}</td>
+                    <td className="p-3 border-b">{formatTime(flight.departureTime)}</td>
+                    <td className="p-3 border-b">{formatDate(flight.arrivalDate)}</td>
+                    <td className="p-3 border-b">{formatTime(flight.arrivalTime)}</td>
+                    <td className="p-3 border-b">${flight.economyPrice}</td>
+                    <td className="p-3 border-b">${flight.premiumPrice}</td>
+                    <td className="p-3 border-b">{flight.status}</td>
+                    <td className="p-3 border-b">
                       <button
-                        className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600 transition"
+                        className="px-4 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-200"
                         onClick={() => navigate(`/flights/${flight._id}`)}
                       >
                         Select
@@ -347,7 +440,6 @@ const FlightManagement = () => {
       </div>
     </div>
   );
-
 };
 
 export default FlightManagement;

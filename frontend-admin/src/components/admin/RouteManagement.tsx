@@ -1,16 +1,25 @@
 import { useState, useEffect } from "react";
+import apiURL from "../../config/config";
 
-// Predefined Canadian Locations
+// Predefined Canadian Airport Locations (Airport Name + City)
 const LOCATIONS = [
-  "Toronto", "Vancouver", "Montreal", "Calgary", "Edmonton",
-  "Ottawa", "Winnipeg", "Quebec City", "Halifax", "Victoria"
+  "Toronto Pearson International Airport (YYZ) - Toronto",
+  "Vancouver International Airport (YVR) - Vancouver",
+  "Montréal-Pierre Elliott Trudeau International Airport (YUL) - Montreal",
+  "Calgary International Airport (YYC) - Calgary",
+  "Edmonton International Airport (YEG) - Edmonton",
+  "Ottawa Macdonald-Cartier International Airport (YOW) - Ottawa",
+  "Winnipeg James Armstrong Richardson International Airport (YWG) - Winnipeg",
+  "Québec City Jean Lesage International Airport (YQB) - Quebec City",
+  "Halifax Stanfield International Airport (YHZ) - Halifax",
+  "Victoria International Airport (YYJ) - Victoria",
 ];
 
 // Route Interface
 interface Route {
   _id?: string;
-  startLocation: string;
-  endLocation: string;
+  startLocation: string; // e.g., "Toronto Pearson International Airport (YYZ) - Toronto"
+  endLocation: string;   // e.g., "Vancouver International Airport (YVR) - Vancouver"
   distance: number;
   duration: string;
 }
@@ -44,8 +53,7 @@ const RouteManagement = () => {
       if (searchStart) queryParams.append("startLocation", searchStart);
       if (searchEnd) queryParams.append("endLocation", searchEnd);
 
-      const response = await fetch(`http://localhost:5000/api/routes?${queryParams.toString()}`);
-
+      const response = await fetch(`${apiURL}/api/routes?${queryParams.toString()}`);
       if (!response.ok) throw new Error(`❌ API Error: ${response.statusText}`);
 
       const data = await response.json();
@@ -69,7 +77,12 @@ const RouteManagement = () => {
 
   /** 🔹 Add Route */
   const addRoute = async () => {
-    if (!newRoute.startLocation || !newRoute.endLocation || !newRoute.distance || newRoute.duration === "00:00") {
+    if (
+      !newRoute.startLocation ||
+      !newRoute.endLocation ||
+      !newRoute.distance ||
+      newRoute.duration === "00:00"
+    ) {
       alert("⚠️ All fields are required!");
       return;
     }
@@ -79,7 +92,7 @@ const RouteManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/routes/add", {
+      const response = await fetch(`${apiURL}/api/routes/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newRoute),
@@ -100,133 +113,178 @@ const RouteManagement = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow-lg mb-8">
-      <h3 className="text-xl font-semibold mb-4">🛤 Route Management</h3>
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+      <h3 className="text-2xl font-semibold text-teal-700 mb-6">🗺️ Route Management</h3>
 
       {/* Add Route */}
-      <div className="bg-gray-100 border p-4 rounded mb-8">
-        <h4 className="text-lg font-semibold mb-4 text-gray-700">➕ Add Route</h4>
-        <select
-          className="border p-2 w-full rounded mb-2 bg-white text-gray-800"
-          value={newRoute.startLocation}
-          onChange={(e) => setNewRoute({ ...newRoute, startLocation: e.target.value })}
-        >
-          <option value="">Select Start Location</option>
-          {LOCATIONS.map((city) => (
-            <option key={city} value={city}>{city}</option>
-          ))}
-        </select>
+      <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">➕ Add Route</h4>
 
-        <select
-          className="border p-2 w-full rounded mb-2 bg-white text-gray-800"
-          value={newRoute.endLocation}
-          onChange={(e) => setNewRoute({ ...newRoute, endLocation: e.target.value })}
-        >
-          <option value="">Select End Location</option>
-          {LOCATIONS.map((city) => (
-            <option key={city} value={city}>{city}</option>
-          ))}
-        </select>
-
-        <input
-          type="number"
-          placeholder="Distance (km)"
-          className="border p-2 w-full rounded mb-2 bg-white placeholder-gray-500 text-gray-800"
-          value={newRoute.distance || ""}
-          onChange={(e) => setNewRoute({ ...newRoute, distance: Number(e.target.value) })}
-        />
-
-        <div className="flex space-x-2 mb-2">
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Start Airport</label>
           <select
-            className="border p-2 flex-1 rounded bg-white text-gray-800"
-            onChange={(e) => handleDurationChange(e.target.value, newRoute.duration.split(":")[1])}
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={newRoute.startLocation}
+            onChange={(e) => setNewRoute({ ...newRoute, startLocation: e.target.value })}
           >
-            {[...Array(24).keys()].map((h) => (
-              <option key={h} value={h}>{h} hrs</option>
-            ))}
-          </select>
-
-          <select
-            className="border p-2 flex-1 rounded bg-white text-gray-800"
-            onChange={(e) => handleDurationChange(newRoute.duration.split(":")[0], e.target.value)}
-          >
-            {[0, 15, 30, 45].map((m) => (
-              <option key={m} value={m}>{m} mins</option>
+            <option value="">Select Start Airport</option>
+            {LOCATIONS.map((location) => (
+              <option key={location} value={location}>
+                {location}
+              </option>
             ))}
           </select>
         </div>
 
-        <button onClick={addRoute} className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">End Airport</label>
+          <select
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            value={newRoute.endLocation}
+            onChange={(e) => setNewRoute({ ...newRoute, endLocation: e.target.value })}
+          >
+            <option value="">Select End Airport</option>
+            {LOCATIONS.map((location) => (
+              <option key={location} value={location}>
+                {location}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Distance (km)</label>
+          <input
+            type="number"
+            placeholder="Distance (km)"
+            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+            value={newRoute.distance || ""}
+            onChange={(e) => setNewRoute({ ...newRoute, distance: Number(e.target.value) })}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="text-sm font-medium text-gray-600">Duration</label>
+          <div className="flex gap-2">
+            <select
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              onChange={(e) =>
+                handleDurationChange(e.target.value, newRoute.duration.split(":")[1])
+              }
+            >
+              {[...Array(24).keys()].map((h) => (
+                <option key={h} value={h}>
+                  {h} hrs
+                </option>
+              ))}
+            </select>
+            <select
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              onChange={(e) =>
+                handleDurationChange(newRoute.duration.split(":")[0], e.target.value)
+              }
+            >
+              {[0, 15, 30, 45].map((m) => (
+                <option key={m} value={m}>
+                  {m} mins
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <button
+          onClick={addRoute}
+          className="w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition duration-200"
+        >
           Add Route
         </button>
       </div>
 
-      {/* 🔍 Search Section */}
-      <div className="bg-gray-100 border p-4 rounded mb-8">
-        <h4 className="text-lg font-semibold mb-4 text-gray-700">🔍 Search Routes</h4>
+      {/* Search Routes */}
+      <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">🔍 Search Routes</h4>
         <div className="flex flex-col md:flex-row gap-4">
-          <select
-            className="border p-2 flex-1 rounded bg-white text-gray-800"
-            value={searchStart}
-            onChange={(e) => setSearchStart(e.target.value)}
-          >
-            <option value="">All Start Locations</option>
-            {LOCATIONS.map((city) => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
+          <div className="flex-1">
+            <label className="text-sm font-medium text-gray-600">Start Airport</label>
+            <select
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              value={searchStart}
+              onChange={(e) => setSearchStart(e.target.value)}
+            >
+              <option value="">All Start Airports</option>
+              {LOCATIONS.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            className="border p-2 flex-1 rounded bg-white text-gray-800"
-            value={searchEnd}
-            onChange={(e) => setSearchEnd(e.target.value)}
-          >
-            <option value="">All End Locations</option>
-            {LOCATIONS.map((city) => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
+          <div className="flex-1">
+            <label className="text-sm font-medium text-gray-600">End Airport</label>
+            <select
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              value={searchEnd}
+              onChange={(e) => setSearchEnd(e.target.value)}
+            >
+              <option value="">All End Airports</option>
+              {LOCATIONS.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <button onClick={fetchRoutes} className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
-            Search
-          </button>
-          <button
-            onClick={() => { setSearchStart(""); setSearchEnd(""); fetchRoutes(); }}
-            className="bg-gray-500 text-white px-5 py-2 rounded hover:bg-gray-600"
-          >
-            Clear
-          </button>
+          <div className="flex gap-2 self-end">
+            <button
+              onClick={fetchRoutes}
+              className="px-5 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition duration-200"
+            >
+              Search
+            </button>
+            <button
+              onClick={() => {
+                setSearchStart("");
+                setSearchEnd("");
+                fetchRoutes();
+              }}
+              className="px-5 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       </div>
 
-
-      {/* 📋 Route List */}
-      <div>
-        <h4 className="text-lg font-semibold mb-3 text-gray-700">📋 Route List</h4>
+      {/* Route List */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">📋 Route List</h4>
         {isSearching ? (
-          <p className="text-blue-500">🔄 Searching...</p>
+          <p className="text-teal-600">🔄 Searching...</p>
         ) : searchError ? (
-          <p className="text-red-500">{searchError}</p>
+          <p className="text-red-600">{searchError}</p>
         ) : routes.length === 0 ? (
           <p className="text-gray-600">No routes found.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border border-gray-300">
-              <thead className="bg-blue-100 text-blue-700">
+            <table className="w-full text-left border border-gray-200">
+              <thead className="bg-teal-600 text-white">
                 <tr>
-                  <th className="p-3 border">Start Location</th>
-                  <th className="p-3 border">End Location</th>
-                  <th className="p-3 border">Distance (km)</th>
-                  <th className="p-3 border">Duration</th>
+                  <th className="p-3 border-b">Start Airport</th>
+                  <th className="p-3 border-b">End Airport</th>
+                  <th className="p-3 border-b">Distance (km)</th>
+                  <th className="p-3 border-b">Duration</th>
                 </tr>
               </thead>
               <tbody>
                 {routes.map((route: Route, index) => (
-                  <tr key={index} className="hover:bg-gray-100 text-gray-800">
-                    <td className="p-3 border">{route.startLocation}</td>
-                    <td className="p-3 border">{route.endLocation}</td>
-                    <td className="p-3 border">{route.distance}</td>
-                    <td className="p-3 border">{route.duration}</td>
+                  <tr key={index} className="hover:bg-teal-50 text-gray-800">
+                    <td className="p-3 border-b">{route.startLocation}</td>
+                    <td className="p-3 border-b">{route.endLocation}</td>
+                    <td className="p-3 border-b">{route.distance}</td>
+                    <td className="p-3 border-b">{route.duration}</td>
                   </tr>
                 ))}
               </tbody>

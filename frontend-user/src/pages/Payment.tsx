@@ -1,96 +1,39 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import StripeCheckout from "../components/payments/StripeCheckout";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency } from "../utils/formatCurrency";
 
-const Payment = () => {
-  const navigate = useNavigate();
-  const [cardNumber, setCardNumber] = useState("");
-  const [name, setName] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
+const PaymentPage = () => {
+    const [amount, setAmount] = useState<number>(0);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const flight = localStorage.getItem("selectedFlight");
-    const passengers = localStorage.getItem("passengerDetails");
-    if (!flight || !passengers) {
-      alert("Missing booking details. Redirecting...");
-      navigate("/flights");
-    }
-  }, [navigate]);
+    useEffect(() => {
+        const flightData = localStorage.getItem("selectedFlight");
+        const passengerData = localStorage.getItem("passengerDetails");
 
-  const handlePayment = () => {
-    // Basic validations
-    if (!cardNumber || !name || !expiry || !cvv) {
-      alert("Please fill in all fields.");
-      return;
-    }
+        if (!flightData || !passengerData) {
+            navigate("/flights");
+            return;
+        }
 
-    if (!/^\d{16}$/.test(cardNumber)) {
-      alert("Card number must be 16 digits.");
-      return;
-    }
+        const { selectedOutbound, selectedInbound } = JSON.parse(flightData);
+        const { passengers } = JSON.parse(passengerData); // ✅ Corrected here
 
-    if (!/^\d{3,4}$/.test(cvv)) {
-      alert("CVV must be 3 or 4 digits.");
-      return;
-    }
+        const pricePerPassenger =
+            (selectedOutbound?.price || 0) +
+            (selectedInbound?.price || 0);
 
-    if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-      alert("Expiry should be in MM/YY format.");
-      return;
-    }
+        const total = pricePerPassenger * passengers.length;
 
-    // 💳 Consider all transactions as successful for now
-    localStorage.setItem("paymentSuccess", "true");
-    alert("✅ Payment successful!");
-    navigate("/confirmation"); // You can create a separate Confirmation.tsx page
-  };
+        setAmount(total);
+    }, [navigate]);
 
-  return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-4 text-blue-700">💳 Payment</h2>
 
-      <input
-        type="text"
-        placeholder="Card Number (16 digits)"
-        value={cardNumber}
-        onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ""))}
-        className="border p-2 rounded w-full mb-3"
-        maxLength={16}
-      />
-
-      <input
-        type="text"
-        placeholder="Name on Card"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border p-2 rounded w-full mb-3"
-      />
-
-      <input
-        type="text"
-        placeholder="Expiry (MM/YY)"
-        value={expiry}
-        onChange={(e) => setExpiry(e.target.value)}
-        className="border p-2 rounded w-full mb-3"
-      />
-
-      <input
-        type="text"
-        placeholder="CVV"
-        value={cvv}
-        onChange={(e) => setCvv(e.target.value)}
-        className="border p-2 rounded w-full mb-3"
-        maxLength={4}
-      />
-
-      <button
-        onClick={handlePayment}
-        className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
-      >
-        Pay Now
-      </button>
-    </div>
-  );
+    return (
+        <div className="min-h-screen bg-gray-100 p-4">
+            <StripeCheckout amount={amount} />            
+        </div>
+    );
 };
 
-export default Payment;
+export default PaymentPage;
