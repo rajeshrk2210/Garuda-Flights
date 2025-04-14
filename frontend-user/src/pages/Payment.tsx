@@ -1,28 +1,39 @@
 import { useEffect, useState } from "react";
 import StripeCheckout from "../components/payments/StripeCheckout";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const PaymentPage = () => {
-  const [amount, setAmount] = useState<number>(0);
-  const navigate = useNavigate();
+    const [amount, setAmount] = useState<number>(0);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const flightData = localStorage.getItem("selectedFlight");
-    if (!flightData) {
-      navigate("/flights");
-      return;
-    }
+    useEffect(() => {
+        const flightData = localStorage.getItem("selectedFlight");
+        const passengerData = localStorage.getItem("passengerDetails");
 
-    const { selectedOutbound, selectedInbound, passengers } = JSON.parse(flightData);
-    const price = (selectedOutbound?.price || 0) + (selectedInbound?.price || 0);
-    setAmount(price * passengers);
-  }, [navigate]);
+        if (!flightData || !passengerData) {
+            navigate("/flights");
+            return;
+        }
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <StripeCheckout amount={amount} />
-    </div>
-  );
+        const { selectedOutbound, selectedInbound } = JSON.parse(flightData);
+        const { passengers } = JSON.parse(passengerData); // ✅ Corrected here
+
+        const pricePerPassenger =
+            (selectedOutbound?.price || 0) +
+            (selectedInbound?.price || 0);
+
+        const total = pricePerPassenger * passengers.length;
+
+        setAmount(total);
+    }, [navigate]);
+
+
+    return (
+        <div className="min-h-screen bg-gray-100 p-4">
+            <StripeCheckout amount={amount} />            
+        </div>
+    );
 };
 
 export default PaymentPage;

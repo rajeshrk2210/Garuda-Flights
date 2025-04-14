@@ -16,10 +16,12 @@ const StripeCheckout = ({ amount }: StripeCheckoutProps) => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!amount) {
-      setError("Amount is missing.");
+    if (amount <= 0) {
+      setError("Amount is missing or invalid.");
+    } else {
+      setError(""); // Clear error when amount is valid
     }
-  }, [amount]);
+  }, [amount]);  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
