@@ -19,9 +19,9 @@ const StripeCheckout = ({ amount }: StripeCheckoutProps) => {
     if (amount <= 0) {
       setError("Amount is missing or invalid.");
     } else {
-      setError(""); // Clear error when amount is valid
+      setError("");
     }
-  }, [amount]);  
+  }, [amount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +35,7 @@ const StripeCheckout = ({ amount }: StripeCheckoutProps) => {
     }
 
     try {
+      // Step 1: Create payment intent
       const res = await fetch(`${apiURL}/api/payments/create-payment-intent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,6 +45,7 @@ const StripeCheckout = ({ amount }: StripeCheckoutProps) => {
       const data = await res.json();
       const clientSecret = data.clientSecret;
 
+      // Step 2: Confirm payment
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement)!,
@@ -52,13 +54,71 @@ const StripeCheckout = ({ amount }: StripeCheckoutProps) => {
 
       if (result.error) {
         setError(result.error.message || "Payment failed");
-      } else if (result.paymentIntent.status === "succeeded") {
+        setLoading(false);
+        return;
+      }
+
+      if (result.paymentIntent.status === "succeeded") {
+        // Step 3: Booking creation
+        const flightData = localStorage.getItem("selectedFlight");
+        const passengerData = localStorage.getItem("passengerDetails");
+        const token = localStorage.getItem("token");
+
+        if (!flightData || !passengerData || !token) {
+          setError("Required booking details missing.");
+          setLoading(false);
+          return;
+        }
+
+        const { selectedOutbound, selectedInbound, flightClass } = JSON.parse(flightData);
+        const seatClass = flightClass;
+
+        const parsedPassengers = JSON.parse(passengerData);
+        const passengers = parsedPassengers.passengers;
+        const contact = parsedPassengers.contactInfo; // ✅ FIXED KEY
+
+        if (!passengers?.length || !contact?.email) {
+          setError("Passenger or contact details are incomplete.");
+          setLoading(false);
+          return;
+        }
+
+
+        const flights = [selectedOutbound._id];
+        if (selectedInbound) flights.push(selectedInbound._id);
+
+        const createBookingRes = await fetch(`${apiURL}/api/bookings`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            flights,
+            seatClass,
+            passengers,
+            contactDetails: contact, // ✅ FIXED KEY
+            price: amount,
+          }),          
+        });
+
+        if (!createBookingRes.ok) {
+          const errData = await createBookingRes.json();
+          setError(`Booking failed: ${errData.message}`);
+          setLoading(false);
+          return;
+        }
+
+        const bookingData = await createBookingRes.json();
+        localStorage.setItem("pnr", bookingData.booking.pnr);
         localStorage.setItem("paymentSuccess", "true");
+
+        // Step 4: Redirect
         navigate("/confirmation");
       }
     } catch (err) {
-      setError("Something went wrong.");
-      console.error(err);
+      console.error("❌ Payment error:", err);
+      setError("Something went wrong during payment.");
     }
 
     setLoading(false);
